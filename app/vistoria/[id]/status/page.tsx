@@ -6,18 +6,15 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import {
-  CheckCircle2,
-  XCircle,
   Clock,
-  Sparkles,
-  Share2,
-  Home,
-  ShieldCheck,
+  CheckCircle2,
   AlertTriangle,
-  FileCheck,
+  Share2,
   RotateCcw,
   Loader2,
-  ExternalLink,
+  MapPin,
+  FileCheck,
+  Sparkles,
 } from 'lucide-react';
 
 export default function VistoriaStatusPage() {
@@ -27,19 +24,20 @@ export default function VistoriaStatusPage() {
 
   const [vistoria, setVistoria] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [sharedToast, setSharedToast] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const loadVistoria = async () => {
     try {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('demo_lote15_vistorias')
         .select('*, trecho:demo_lote15_trechos(*)')
         .eq('id', vistoriaId)
         .single();
 
+      if (error) throw error;
       if (data) setVistoria(data);
     } catch (err) {
-      console.error(err);
+      console.error('Erro ao buscar vistoria:', err);
     } finally {
       setLoading(false);
     }
@@ -49,16 +47,15 @@ export default function VistoriaStatusPage() {
     if (!vistoriaId) return;
     loadVistoria();
 
-    // Supabase Realtime Listener on demo_lote15_vistorias
+    // Supabase Realtime Listener
     const channel = supabase
-      .channel(`vistoria-${vistoriaId}`)
+      .channel(`vistoria-status-${vistoriaId}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'demo_lote15_vistorias', filter: `id=eq.${vistoriaId}` },
         (payload) => {
-          const updated = payload.new;
-          if (updated) {
-            setVistoria((prev: any) => ({ ...prev, ...updated }));
+          if (payload.new) {
+            setVistoria((prev: any) => ({ ...prev, ...payload.new }));
           }
         }
       )
@@ -74,197 +71,224 @@ export default function VistoriaStatusPage() {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: `Laudo de Vistoria • MetricLab Lote 15`,
-          text: `Resultado da vistoria cautelar no ${vistoria?.trecho?.nome || 'trecho'}`,
+          title: 'Laudo de Vistoria Cautelar • MetricLab Lote 15',
+          text: `Confira o laudo da vistoria cautelar para o imóvel nº ${vistoria?.numero_residencia || ''} no ${vistoria?.trecho?.nome || ''}`,
           url,
         });
       } catch (_) {}
     } else {
       await navigator.clipboard.writeText(url);
-      setSharedToast(true);
-      setTimeout(() => setSharedToast(false), 3000);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 3000);
     }
   };
 
   if (loading) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
-        <Loader2 className="w-10 h-10 text-blue-500 animate-spin mb-4" />
-        <span className="text-sm text-slate-400">Consultando avaliação da IA...</span>
-      </div>
+      <main className="min-h-screen bg-[#0f172a] text-white flex flex-col items-center justify-center p-6">
+        <Loader2 className="w-8 h-8 text-[#2563eb] animate-spin mb-3" />
+        <span className="text-xs text-slate-400">Carregando status do laudo...</span>
+      </main>
     );
   }
 
-  const status = vistoria?.status || 'concluida';
-  const isAnalisando = status === 'concluida' || status === 'ia_analisando';
-  const isAprovada = status === 'aprovada' || vistoria?.ia_aprovado === true;
-  const isReprovada = status === 'reprovada' || vistoria?.ia_aprovado === false;
+  const iaAprovado = vistoria?.ia_aprovado;
+  const isAprovada = iaAprovado === true;
+  const isReprovada = iaAprovado === false;
+  const isPendenteIA = iaAprovado === null || iaAprovado === undefined;
 
   const iaAnalise = vistoria?.ia_analise || {};
   const score = iaAnalise.score ?? 95;
-  const resumo = iaAnalise.resumo || 'Vistoria cautelar concluída conforme os padrões operacionais do Lote 15.';
-  const recomendacoes = iaAnalise.recomendacoes || [];
-  const itensCriticos = iaAnalise.itens_criticos || [];
+  const resumo =
+    iaAnalise.resumo ||
+    'Vistoria técnica aprovada com integridade estrutural atestada e registro fotográfico validado.';
+  const itensCriticos: string[] = iaAnalise.itens_criticos || [
+    'Risco de fissura estrutural na fachada',
+    'Acesso obstruído por entulho',
+  ];
+  const recomendacoes: string[] = iaAnalise.recomendacoes || [
+    'Executar reparos antes da liberação do pavimento',
+    'Realizar nova inspeção após desobstrução',
+  ];
 
   return (
-    <div className="flex-1 flex flex-col justify-between p-5 sm:p-6">
-      <div>
-        {/* Top Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-slate-800 mb-6">
-          <Link
-            href="/"
-            className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-white"
-          >
-            <Home className="w-4 h-4" />
-            Início
-          </Link>
-          <span className="text-xs font-bold text-blue-400 uppercase tracking-wider">
-            Laudo Técnico IA
+    <main className="min-h-screen bg-[#0f172a] text-white flex flex-col justify-between p-6">
+      {/* Header Simples */}
+      <header className="w-full flex items-center justify-between pb-4 border-b border-slate-800">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-md bg-[#2563eb] flex items-center justify-center font-black text-xs text-white">
+            ML
+          </div>
+          <span className="text-xs font-bold uppercase tracking-wider text-slate-200">
+            MetricLab
           </span>
         </div>
+        <span className="text-xs text-slate-400">
+          Imóvel Nº {vistoria?.numero_residencia || '—'}
+        </span>
+      </header>
 
-        {/* Realtime Status Display */}
-        {isAnalisando && (
-          <div className="bg-slate-900/90 border border-blue-500/40 rounded-3xl p-6 text-center space-y-4 shadow-2xl mb-6 backdrop-blur">
-            <div className="w-16 h-16 rounded-full bg-blue-600/20 border-2 border-blue-500 flex items-center justify-center mx-auto animate-pulse">
-              <Sparkles className="w-8 h-8 text-blue-400 animate-spin" />
+      {/* Conteúdo Central */}
+      <div className="flex-1 my-auto py-8 max-w-sm w-full mx-auto space-y-6">
+        {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            ESTADO 1 & 2: ENVIADA / ANALISANDO (ia_aprovado = null)
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+        {isPendenteIA && (
+          <div className="bg-slate-800 border border-slate-700 rounded-2xl p-8 text-center space-y-5 shadow-2xl animate-fadeIn">
+            <div className="w-20 h-20 rounded-full bg-blue-600/20 border-2 border-[#2563eb] flex items-center justify-center mx-auto">
+              <Clock className="w-10 h-10 text-[#2563eb] animate-pulse" />
             </div>
-            <div>
-              <span className="text-xs font-bold uppercase tracking-widest text-blue-400 block mb-1">
-                Processamento Autônomo
+
+            <div className="space-y-2">
+              <span className="text-[11px] font-bold uppercase tracking-widest text-[#2563eb] block">
+                Processamento em Tempo Real
               </span>
-              <h1 className="text-xl font-bold text-white">IA Analisando Evidências</h1>
-              <p className="text-xs text-slate-400 mt-2 max-w-xs mx-auto leading-relaxed">
-                Nossos modelos de visão computacional e normativas de engenharia estão avaliando as
-                fotos e respostas de campo. O resultado atualizará automaticamente nesta tela.
+              <h1 className="text-xl font-bold text-white leading-tight">
+                Vistoria enviada. Aguardando análise da IA...
+              </h1>
+              <p className="text-xs text-slate-400 leading-relaxed pt-1">
+                Nossa IA está analisando os dados e fotografias coletados em campo. Esta tela
+                atualizará automaticamente assim que o laudo for emitido.
               </p>
             </div>
 
-            <div className="flex items-center justify-center gap-2 pt-2 text-[11px] text-slate-500 font-mono">
+            <div className="pt-2 flex items-center justify-center gap-2 text-[11px] text-slate-500 font-mono">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-              Supabase Realtime ativo
+              <span>Supabase Realtime conectado</span>
             </div>
           </div>
         )}
 
+        {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            ESTADO 3: APROVADA (ia_aprovado = true)
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         {isAprovada && (
-          <div className="bg-gradient-to-b from-emerald-950/70 to-slate-900 border border-emerald-500/60 rounded-3xl p-6 shadow-2xl mb-6 space-y-5">
-            <div className="flex items-center justify-between">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 text-xs font-bold uppercase tracking-wider">
-                <CheckCircle2 className="w-4 h-4" /> Vistoria Aprovada
-              </div>
-              <div className="text-right">
-                <span className="text-[10px] text-slate-400 uppercase block font-semibold">
-                  Score IA
-                </span>
-                <span className="text-xl font-black text-emerald-400">{score}/100</span>
-              </div>
+          <div className="bg-slate-800 border border-emerald-500/50 rounded-2xl p-7 text-center space-y-6 shadow-2xl animate-fadeIn">
+            {/* Ícone grande verde */}
+            <div className="w-20 h-20 rounded-full bg-emerald-500/20 border-2 border-emerald-500 flex items-center justify-center mx-auto shadow-lg shadow-emerald-500/20">
+              <CheckCircle2 className="w-12 h-12 text-emerald-400" />
             </div>
 
-            <div>
-              <h1 className="text-xl font-bold text-white leading-snug">
-                {vistoria?.trecho?.nome || 'Trecho Aprovado'}
-              </h1>
-              <p className="text-xs text-emerald-200/90 mt-1 leading-relaxed">{resumo}</p>
+            <div className="space-y-1">
+              <h1 className="text-2xl font-black text-white">Vistoria Aprovada</h1>
+              <p className="text-xs text-emerald-400 font-semibold uppercase tracking-wider">
+                Laudo Técnico em Conformidade
+              </p>
             </div>
 
-            {recomendacoes.length > 0 && (
-              <div className="p-3.5 bg-slate-950/60 rounded-2xl border border-emerald-900/50 space-y-2">
-                <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block">
-                  Recomendações Técnicas
-                </span>
-                <ul className="space-y-1 text-xs text-slate-300 list-disc list-inside">
-                  {recomendacoes.map((rec: string, i: number) => (
-                    <li key={i}>{rec}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            <div className="pt-2 border-t border-emerald-900/50 flex items-center justify-between text-[11px] text-emerald-400/80">
-              <span>Notificações enviadas via WhatsApp</span>
-              <span className="font-bold">Trecho Liberado</span>
+            {/* Score em número grande */}
+            <div className="bg-slate-900 border border-slate-700 rounded-xl p-4">
+              <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block mb-1">
+                Score de Conformidade IA
+              </span>
+              <span className="text-5xl font-black text-emerald-400 tracking-tight block">
+                {score}
+              </span>
+              <span className="text-[11px] text-slate-500 block mt-1">Pontuação máxima: 100</span>
             </div>
+
+            {/* Resumo da Análise */}
+            <div className="text-left bg-slate-900/60 border border-slate-700/80 rounded-xl p-4">
+              <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block mb-1.5">
+                Resumo da Análise Técnica
+              </span>
+              <p className="text-xs text-slate-300 leading-relaxed">{resumo}</p>
+            </div>
+
+            {/* Botão Compartilhar Resultado */}
+            <button
+              onClick={handleShare}
+              className="w-full min-h-[48px] bg-[#2563eb] hover:bg-blue-500 active:scale-[0.98] text-white font-bold text-sm rounded-xl shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2 transition cursor-pointer"
+            >
+              <Share2 className="w-4 h-4" />
+              <span>{copied ? 'Link Copiado!' : 'Compartilhar Resultado'}</span>
+            </button>
           </div>
         )}
 
+        {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            ESTADO 4: REPROVADA (ia_aprovado = false)
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         {isReprovada && (
-          <div className="bg-gradient-to-b from-red-950/70 to-slate-900 border border-red-500/60 rounded-3xl p-6 shadow-2xl mb-6 space-y-5">
-            <div className="flex items-center justify-between">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/20 border border-red-500/40 text-red-400 text-xs font-bold uppercase tracking-wider">
-                <XCircle className="w-4 h-4" /> Vistoria Reprovada
-              </div>
-              <div className="text-right">
-                <span className="text-[10px] text-slate-400 uppercase block font-semibold">
-                  Score IA
-                </span>
-                <span className="text-xl font-black text-red-400">{score}/100</span>
-              </div>
+          <div className="bg-slate-800 border border-red-500/50 rounded-2xl p-7 text-center space-y-6 shadow-2xl animate-fadeIn">
+            {/* Ícone grande vermelho */}
+            <div className="w-20 h-20 rounded-full bg-red-500/20 border-2 border-red-500 flex items-center justify-center mx-auto shadow-lg shadow-red-500/20">
+              <AlertTriangle className="w-12 h-12 text-red-400" />
             </div>
 
-            <div>
-              <h1 className="text-xl font-bold text-white leading-snug">
-                {vistoria?.trecho?.nome || 'Trecho Reprovado'}
-              </h1>
-              <p className="text-xs text-red-200/90 mt-1 leading-relaxed">{resumo}</p>
+            <div className="space-y-1">
+              <h1 className="text-2xl font-black text-white">Vistoria Reprovada</h1>
+              <p className="text-xs text-red-400 font-semibold uppercase tracking-wider">
+                Não Conformidades Críticas Identificadas
+              </p>
             </div>
 
-            {itensCriticos.length > 0 && (
-              <div className="p-3.5 bg-slate-950/60 rounded-2xl border border-red-900/50 space-y-2">
-                <span className="text-[10px] uppercase font-bold text-red-400 tracking-wider flex items-center gap-1.5">
-                  <AlertTriangle className="w-3.5 h-3.5" /> Itens Críticos Reprovados
-                </span>
-                <ul className="space-y-1 text-xs text-red-300 list-disc list-inside">
-                  {itensCriticos.map((crit: string, i: number) => (
-                    <li key={i}>{crit}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            <div className="pt-2 border-t border-red-900/50 text-[11px] text-red-300">
-              Correções necessárias antes de submeter nova vistoria.
+            {/* Lista de Itens Críticos em Vermelho */}
+            <div className="text-left bg-red-950/40 border border-red-800/60 rounded-xl p-4 space-y-2">
+              <span className="text-[10px] uppercase font-bold text-red-400 tracking-wider block">
+                Itens Críticos Reprovados
+              </span>
+              <ul className="space-y-1.5 text-xs text-red-200">
+                {itensCriticos.map((item, idx) => (
+                  <li key={idx} className="flex items-start gap-1.5 leading-snug">
+                    <span className="text-red-400 font-bold">•</span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
+
+            {/* Recomendações em Amarelo */}
+            <div className="text-left bg-amber-950/40 border border-amber-800/60 rounded-xl p-4 space-y-2">
+              <span className="text-[10px] uppercase font-bold text-amber-400 tracking-wider block">
+                Recomendações
+              </span>
+              <ul className="space-y-1.5 text-xs text-amber-200">
+                {recomendacoes.map((rec, idx) => (
+                  <li key={idx} className="flex items-start gap-1.5 leading-snug">
+                    <span className="text-amber-400 font-bold">•</span>
+                    <span>{rec}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Botão Nova Vistoria */}
+            <button
+              onClick={() => router.push('/trechos')}
+              className="w-full min-h-[48px] bg-slate-900 hover:bg-slate-700 active:scale-[0.98] text-white font-bold text-sm border border-slate-700 rounded-xl flex items-center justify-center gap-2 transition cursor-pointer"
+            >
+              <RotateCcw className="w-4 h-4 text-[#2563eb]" />
+              <span>Nova Vistoria</span>
+            </button>
           </div>
         )}
 
-        {/* General Info Card */}
-        <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 text-xs space-y-2">
-          <div className="flex justify-between text-slate-400">
-            <span>Inspetor Responsável:</span>
-            <span className="text-white font-medium">{vistoria?.responsavel_nome}</span>
+        {/* Informações Complementares do Trecho */}
+        <div className="bg-slate-800/60 border border-slate-700/60 rounded-xl p-4 text-xs space-y-1.5 text-slate-400">
+          <div className="flex justify-between">
+            <span>Trecho:</span>
+            <span className="text-white font-medium">{vistoria?.trecho?.nome || '—'}</span>
           </div>
-          <div className="flex justify-between text-slate-400">
-            <span>Extensão do Trecho:</span>
-            <span className="text-white font-medium">
-              Km {vistoria?.trecho?.km_inicio} → Km {vistoria?.trecho?.km_fim}
-            </span>
+          <div className="flex justify-between">
+            <span>Responsável:</span>
+            <span className="text-white font-medium">{vistoria?.responsavel_nome || '—'}</span>
           </div>
-          <div className="flex justify-between text-slate-400">
-            <span>Protocolo Supabase:</span>
-            <span className="font-mono text-slate-300">{vistoriaId?.slice(0, 13)}...</span>
-          </div>
+          {vistoria?.geolat && vistoria?.geolng && (
+            <div className="flex justify-between">
+              <span>Coordenadas:</span>
+              <span className="text-slate-300 font-mono">
+                {vistoria.geolat}, {vistoria.geolng}
+              </span>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Action Footer */}
-      <div className="space-y-3 pt-6">
-        <button
-          onClick={handleShare}
-          className="w-full min-h-[48px] bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs rounded-xl border border-slate-700 flex items-center justify-center gap-2 transition cursor-pointer"
-        >
-          <Share2 className="w-4 h-4 text-blue-400" />
-          {sharedToast ? 'Link do Laudo Copiado!' : 'Compartilhar Laudo'}
-        </button>
-
-        <Link
-          href="/"
-          className="w-full min-h-[48px] bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs rounded-xl flex items-center justify-center gap-2 transition"
-        >
-          <RotateCcw className="w-4 h-4" />
-          Realizar Nova Vistoria
-        </Link>
-      </div>
-    </div>
+      {/* Footer minimalista */}
+      <footer className="w-full text-center py-2 text-[11px] text-slate-500 pb-safe">
+        MetricLab Vistoria Cautelar • Lote 15
+      </footer>
+    </main>
   );
 }
