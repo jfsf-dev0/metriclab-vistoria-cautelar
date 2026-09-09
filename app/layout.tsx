@@ -2,8 +2,8 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'MetricLab Vistoria',
-  description: 'Vistoria Cautelar — MetricLab Lote 15',
+  title: 'MetricLab Vistoria Cautelar',
+  description: 'Vistoria Cautelar — Consorcio Pacote 15 e 19',
   manifest: '/manifest.json',
   icons: {
     icon: '/icon-192.png',
@@ -30,7 +30,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR">
+    <html lang="pt-BR" className="bg-[#0f172a]">
       <head>
         <link rel="manifest" href="/manifest.json" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
