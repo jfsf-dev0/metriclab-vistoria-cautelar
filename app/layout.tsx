@@ -37,14 +37,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className={`${inter.variable} bg-gray-50`}>
+    <html lang="pt-BR" className={`${inter.variable} bg-[#F5F5F5]`}>
       <head>
         <link rel="manifest" href="/manifest.json" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
       </head>
-      <body className={`${inter.className} bg-gray-50 text-gray-900 min-h-screen antialiased flex flex-col items-center selection:bg-blue-100 selection:text-blue-900`}>
-        <div className="w-full max-w-md min-h-screen flex flex-col bg-gray-50 sm:shadow-md sm:border-x sm:border-gray-200 relative">
+      <body className={`${inter.className} bg-[#F5F5F5] text-gray-900 min-h-screen antialiased flex flex-col items-center selection:bg-blue-100 selection:text-blue-900`}>
+        <div className="w-full max-w-md min-h-screen flex flex-col bg-[#F5F5F5] sm:shadow-md sm:border-x sm:border-gray-200 relative">
           {children}
         </div>
       </body>
