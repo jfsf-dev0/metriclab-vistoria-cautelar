@@ -121,5 +121,23 @@ Reestruturar completamente o layout e a arquitetura de interface do PWA `jfsf-de
   - Seed no Supabase com vistorias, ocorrências e registros de demonstração.
   - Arquivo de migração `supabase/migrations/20260910000000_add_rua_to_vistorias.sql`.
 
+---
 
-
+### Refatoração do Login com 4 Etapas Progressivas em Tela Única (`app/login/page.tsx`)
+- **Arquitetura & Card Central Fixo**:
+  - Fundo `#F0F0F0`, card centralizado absoluto com `top: 50%; left: 50%; transform: translate(-50%, -50%)`.
+  - Dimensões: `max-width: 380px`, `width: calc(100% - 48px)`, `padding: 32px 28px`, `border-radius: 16px`, borda 1px `#E5E5E3`.
+  - Transição de expansão vertical suave `transition: all 300ms ease`.
+- **4 Etapas Progressivas Integradas**:
+  - **Etapa 0 (Entrada)**: Card limpo com Logo `m.` (`m` em `#111111`, `.` em `#F5A623`, 28px 700), título "Vistoria Cautelar" (22px 700), subtítulo "Pacote 15 e 19" (13px 400 `#9B9B9B`), espaçamento de 32px e botão preto full-width "Entrar" (44px, radius 8px).
+  - **Etapa 1 (Campo Email/Telefone)**: Expansão com fade-in suave, input underline sem caixa (15px, placeholder `seu@email.com ou +55 (11) 99999`, autofocus), botão "Entrar" desabilitado (`opacity: 0.35`, `pointer-events: none`) e text-link "← Voltar" (12px `#9B9B9B`) que retorna à Etapa 0.
+  - **Etapa 2 (Escolha do Método)**: Disparo automático ao digitar qualquer caractere no campo, exibindo com fade-in (`opacity 0→1, translateY 6→0, 250ms ease`) dois botões lado a lado: "Entrar com chave" (ícone Lock 15px) e "Código único" (ícone Smartphone 15px), com legenda Demo "use o código 123456".
+  - **Etapa 3A (Entrar com chave)**: Destaque visual no botão selecionado (`#F7F7F7` e borda `#111111`), label "CÓDIGO DE ACESSO" com hint Demo, input type password com tracking 4px e placeholder `••••••`. Botão "Entrar" ativa exclusivamente com 6 dígitos (`opacity: 1.0`, `pointer-events: auto`).
+  - **Etapa 3B (Código único)**: Mensagem contextual "Código enviado para [identificador]", label "CÓDIGO RECEBIDO", input com tracking 6px e placeholder `000000`. Botão alternado para texto "Confirmar", ativando com 6 dígitos.
+- **Validação e Redirecionamento**:
+  - Aceite universal do código demo `123456` para qualquer input com criação de sessão do inspetor demo.
+  - Consulta ao Supabase na tabela `demo_lote15_leads` por email/telefone e chave ativa.
+  - Shake animation (`animate-shake`) e mensagem de erro "Código inválido" (12px `#DC2626`) em caso de falha.
+  - Persistência no `localStorage` sob a chave `ml_vistoria_session` e redirecionamento para `/home`.
+- **Verificação & Build**:
+  - `npm run build` executado com 0 erros de TypeScript e compilação estática de todas as rotas com sucesso.
