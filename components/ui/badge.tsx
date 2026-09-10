@@ -2,7 +2,7 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 
 export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
-  variant?: 'azul' | 'verde' | 'vermelho' | 'amarelo' | 'slate';
+  variant?: 'azul' | 'verde' | 'vermelho' | 'amarelo' | 'slate' | 'blue' | 'green' | 'red' | 'amber' | 'gray';
 }
 
 export function Badge({
@@ -12,11 +12,16 @@ export function Badge({
   ...props
 }: BadgeProps) {
   const variants = {
-    azul: 'bg-blue-500/20 text-blue-400 border border-blue-500/30',
-    verde: 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30',
-    vermelho: 'bg-red-500/20 text-red-400 border border-red-500/30',
-    amarelo: 'bg-amber-500/20 text-amber-400 border border-amber-500/30',
-    slate: 'bg-slate-800 text-slate-400 border border-slate-700/50',
+    azul: 'bg-blue-50 text-blue-700 border border-blue-200',
+    blue: 'bg-blue-50 text-blue-700 border border-blue-200',
+    verde: 'bg-green-50 text-green-700 border border-green-200',
+    green: 'bg-green-50 text-green-700 border border-green-200',
+    vermelho: 'bg-red-50 text-red-700 border border-red-200',
+    red: 'bg-red-50 text-red-700 border border-red-200',
+    amarelo: 'bg-amber-50 text-amber-700 border border-amber-200',
+    amber: 'bg-amber-50 text-amber-700 border border-amber-200',
+    slate: 'bg-gray-100 text-gray-700 border border-gray-200',
+    gray: 'bg-gray-100 text-gray-700 border border-gray-200',
   };
 
   return (

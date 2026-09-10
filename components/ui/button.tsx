@@ -25,21 +25,21 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ) => {
     const variants = {
       primary:
-        'bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-lg shadow-blue-600/20 disabled:bg-blue-900 disabled:opacity-60',
+        'bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold shadow-sm transition-all duration-200 disabled:opacity-50',
       secondary:
-        'bg-slate-700 hover:bg-slate-600 text-white font-medium disabled:bg-slate-800 disabled:opacity-50',
+        'bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-xl transition-all duration-200 disabled:opacity-50',
       danger:
-        'bg-red-600/20 hover:bg-red-600/30 text-red-400 border border-red-500/30 font-semibold disabled:opacity-40',
+        'bg-red-600 hover:bg-red-700 text-white font-semibold shadow-sm transition-all duration-200 disabled:opacity-50',
       outline:
-        'border border-slate-700/50 hover:bg-slate-800 text-white disabled:opacity-40',
+        'bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 transition-all duration-200 disabled:opacity-50',
       ghost:
-        'hover:bg-slate-800 text-slate-400 hover:text-white disabled:opacity-40',
+        'hover:bg-gray-100 text-gray-600 hover:text-gray-900 transition-all duration-200 disabled:opacity-50',
     };
 
     const sizes = {
-      sm: 'px-3 py-2 text-xs min-h-[38px] rounded-lg',
-      md: 'px-6 py-3 text-sm min-h-[48px] rounded-xl',
-      lg: 'px-8 py-4 text-base min-h-[54px] rounded-xl font-bold',
+      sm: 'px-3 py-1.5 text-xs min-h-[36px] rounded-lg',
+      md: 'px-6 py-3 text-sm min-h-[48px] rounded-xl font-semibold',
+      lg: 'px-6 py-3 text-base min-h-[48px] rounded-xl font-semibold',
     };
 
     const isDisabled = disabled || loading;

@@ -1,5 +1,12 @@
 import type { Metadata, Viewport } from 'next';
+import { Inter } from 'next/font/google';
 import './globals.css';
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: 'MetricLab Vistoria Cautelar',
@@ -11,13 +18,13 @@ export const metadata: Metadata = {
   },
   appleWebApp: {
     capable: true,
-    statusBarStyle: 'black-translucent',
+    statusBarStyle: 'default',
     title: 'MetricLab Vistoria',
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: '#2563eb',
+  themeColor: '#ffffff',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
@@ -30,14 +37,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className="bg-[#0f172a]">
+    <html lang="pt-BR" className={`${inter.variable} bg-gray-50`}>
       <head>
         <link rel="manifest" href="/manifest.json" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
       </head>
-      <body className="bg-[#0f172a] text-slate-100 min-h-screen antialiased flex flex-col items-center">
-        <div className="w-full max-w-md min-h-screen flex flex-col bg-[#0f172a] shadow-2xl relative">
+      <body className={`${inter.className} bg-gray-50 text-gray-900 min-h-screen antialiased flex flex-col items-center selection:bg-blue-100 selection:text-blue-900`}>
+        <div className="w-full max-w-md min-h-screen flex flex-col bg-gray-50 sm:shadow-md sm:border-x sm:border-gray-200 relative">
           {children}
         </div>
       </body>

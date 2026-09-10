@@ -21,7 +21,7 @@ export function LoadingSkeleton({
   return (
     <div
       className={cn(
-        'animate-pulse bg-slate-700/60',
+        'animate-pulse bg-gray-200',
         variants[variant],
         className
       )}
@@ -32,15 +32,15 @@ export function LoadingSkeleton({
 
 export function TrechoCardSkeleton() {
   return (
-    <div className="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-4 shadow-lg flex items-center justify-between gap-3 animate-pulse">
+    <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm flex items-center justify-between gap-3 animate-pulse">
       <div className="space-y-2 flex-1">
-        <div className="h-5 w-48 bg-slate-700/70 rounded-md" />
+        <div className="h-5 w-48 bg-gray-200 rounded-md" />
         <div className="flex items-center gap-2">
-          <div className="h-4 w-28 bg-slate-700/50 rounded-md" />
-          <div className="h-4 w-32 bg-slate-700/40 rounded-full" />
+          <div className="h-4 w-28 bg-gray-200 rounded-md" />
+          <div className="h-4 w-32 bg-gray-200 rounded-full" />
         </div>
       </div>
-      <div className="w-8 h-8 rounded-full bg-slate-700/50 shrink-0" />
+      <div className="w-8 h-8 rounded-full bg-gray-200 shrink-0" />
     </div>
   );
 }

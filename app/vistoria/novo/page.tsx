@@ -119,7 +119,7 @@ function VistoriaFormContent() {
         ctx.lineWidth = 2.5;
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
-        ctx.strokeStyle = '#1e3a8a';
+        ctx.strokeStyle = '#1e3a5f';
       }
     }
   }, [passo]);
@@ -361,10 +361,10 @@ function VistoriaFormContent() {
 
   if (loadingTrecho) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-900 to-slate-800 text-white flex flex-col items-center justify-center p-6">
-        <Loader2 className="w-8 h-8 text-blue-500 animate-spin mb-3" />
-        <span className="text-xs text-slate-400">Carregando dados do trecho...</span>
-      </div>
+      <main className="min-h-screen bg-gray-50 text-gray-900 flex flex-col items-center justify-center p-6">
+        <Loader2 className="w-8 h-8 text-blue-600 animate-spin mb-3" />
+        <span className="text-xs text-gray-500">Carregando dados do trecho...</span>
+      </main>
     );
   }
 
@@ -372,7 +372,7 @@ function VistoriaFormContent() {
   const progressoPercent = (passo / 4) * 100;
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-900 to-slate-800 text-white flex flex-col justify-between">
+    <main className="min-h-screen bg-gray-50 text-gray-900 flex flex-col justify-between">
       {/* Hidden file input for camera */}
       <input
         type="file"
@@ -393,47 +393,49 @@ function VistoriaFormContent() {
               if (passo > 1) setPasso((prev) => (prev - 1) as any);
               else router.push('/trechos');
             }}
-            className="p-1.5 -ml-1 text-slate-400 hover:text-white transition flex items-center gap-1 text-xs cursor-pointer active:scale-95"
+            className="p-1.5 -ml-1 text-gray-600 hover:text-gray-900 transition flex items-center gap-1 text-xs cursor-pointer active:scale-95"
           >
             <ChevronLeft className="w-5 h-5" />
             <span className="font-medium">Voltar</span>
           </button>
         }
         rightAction={
-          <Badge variant="azul">
+          <span className="bg-blue-50 text-blue-700 border border-blue-200 rounded-full px-3 py-1 text-xs font-semibold">
             Passo {passo} de 4
-          </Badge>
+          </span>
         }
       />
 
-      {/* Barra de progresso linear no topo: h-1 bg-slate-700 com preenchimento bg-blue-500 */}
-      <div className="w-full h-1 bg-slate-700/60 overflow-hidden">
+      {/* Barra de progresso linear: bg-gray-200 rounded-full h-1.5 fill: bg-blue-600 */}
+      <div className="w-full bg-gray-200 h-1.5">
         <div
-          className="h-full bg-blue-500 transition-all duration-300 ease-out shadow-sm shadow-blue-500"
+          className="h-full bg-blue-600 rounded-full transition-all duration-500 ease-out"
           style={{ width: `${progressoPercent}%` }}
         />
       </div>
 
       {/* Container Central */}
-      <div className="flex-1 px-4 py-6 max-w-md w-full mx-auto space-y-6 animate-in fade-in duration-200">
+      <div className="flex-1 py-6 max-w-md w-full mx-auto space-y-4 animate-in fade-in duration-200">
         {erroGeral && (
-          <Toast
-            message={erroGeral}
-            variant="error"
-            onClose={() => setErroGeral(null)}
-          />
+          <div className="px-4">
+            <Toast
+              message={erroGeral}
+              variant="error"
+              onClose={() => setErroGeral(null)}
+            />
+          </div>
         )}
 
         {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
             PASSO 1: DADOS DA RESIDÊNCIA
         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         {passo === 1 && (
-          <Card className="p-6 space-y-5 animate-in fade-in duration-200">
+          <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-5 mx-4 mb-4 space-y-5 animate-in fade-in duration-200">
             <div className="space-y-1">
-              <h1 className="text-xl font-bold text-white tracking-tight">
+              <h1 className="text-xl font-bold text-gray-900 tracking-tight">
                 Dados da Residência
               </h1>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-gray-500">
                 Informe a identificação do imóvel objeto desta vistoria
               </p>
             </div>
@@ -457,7 +459,7 @@ function VistoriaFormContent() {
               />
 
               <div className="w-full space-y-1.5 text-left">
-                <label className="block text-xs font-medium text-slate-400">
+                <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wide">
                   Observações iniciais (opcional)
                 </label>
                 <textarea
@@ -465,7 +467,7 @@ function VistoriaFormContent() {
                   value={observacaoInicial}
                   onChange={(e) => setObservacaoInicial(e.target.value)}
                   placeholder="Observações visuais preliminares sobre a fachada, vizinhança ou estado geral..."
-                  className="w-full bg-slate-800 border border-slate-600 text-white placeholder:text-slate-500 rounded-xl p-4 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full bg-white border border-gray-300 text-gray-900 placeholder:text-gray-400 rounded-xl p-4 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
                 />
               </div>
             </div>
@@ -476,24 +478,25 @@ function VistoriaFormContent() {
                 fullWidth
                 disabled={!canAdvancePasso1}
                 onClick={() => setPasso(2)}
+                className="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold rounded-xl px-6 py-3 min-h-[48px] w-full transition-all duration-200 shadow-sm"
               >
                 <span>Próximo: Checklist</span>
                 <ArrowRight className="w-4 h-4" />
               </Button>
             </div>
-          </Card>
+          </div>
         )}
 
         {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
             PASSO 2: CHECKLIST (SIM/NÃO)
         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         {passo === 2 && (
-          <div className="space-y-4 animate-in fade-in duration-200">
-            <div className="space-y-1 px-1">
-              <h1 className="text-xl font-bold text-white tracking-tight">
+          <div className="space-y-4 animate-in fade-in duration-200 mx-4 mb-4">
+            <div className="space-y-1">
+              <h1 className="text-xl font-bold text-gray-900 tracking-tight">
                 Checklist de Vistoria
               </h1>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-gray-500">
                 Responda todas as 6 perguntas para validar os quesitos técnicos
               </p>
             </div>
@@ -504,9 +507,9 @@ function VistoriaFormContent() {
                 return (
                   <div
                     key={idx}
-                    className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4 flex items-center justify-between gap-3 shadow-md transition-all"
+                    className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm flex items-center justify-between gap-3 transition-all"
                   >
-                    <span className="text-xs font-medium text-white flex-1 pr-2 leading-relaxed">
+                    <span className="text-sm font-medium text-gray-900 flex-1 pr-2 leading-relaxed">
                       {idx + 1}. {pergunta}
                     </span>
 
@@ -517,13 +520,13 @@ function VistoriaFormContent() {
                         onClick={() =>
                           setRespostas((prev) => ({ ...prev, [idx]: true }))
                         }
-                        className={`min-h-[44px] min-w-[62px] px-3.5 rounded-xl text-xs font-semibold transition-all duration-200 flex items-center justify-center gap-1 cursor-pointer active:scale-95 ${
+                        className={`min-h-[44px] px-4 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-1 cursor-pointer active:scale-95 ${
                           resp === true
-                            ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30'
-                            : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                            ? 'bg-emerald-600 text-white shadow-sm'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                         }`}
                       >
-                        <Check className="w-3.5 h-3.5" />
+                        <Check className="w-4 h-4" />
                         <span>Sim</span>
                       </button>
 
@@ -533,13 +536,13 @@ function VistoriaFormContent() {
                         onClick={() =>
                           setRespostas((prev) => ({ ...prev, [idx]: false }))
                         }
-                        className={`min-h-[44px] min-w-[62px] px-3.5 rounded-xl text-xs font-semibold transition-all duration-200 flex items-center justify-center gap-1 cursor-pointer active:scale-95 ${
+                        className={`min-h-[44px] px-4 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-1 cursor-pointer active:scale-95 ${
                           resp === false
-                            ? 'bg-red-600 text-white shadow-md shadow-red-600/30'
-                            : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                            ? 'bg-red-600 text-white shadow-sm'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                         }`}
                       >
-                        <X className="w-3.5 h-3.5" />
+                        <X className="w-4 h-4" />
                         <span>Não</span>
                       </button>
                     </div>
@@ -554,6 +557,7 @@ function VistoriaFormContent() {
                 fullWidth
                 disabled={!canAdvancePasso2}
                 onClick={() => setPasso(3)}
+                className="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold rounded-xl px-6 py-3 min-h-[48px] w-full transition-all duration-200 shadow-sm"
               >
                 <span>
                   Próximo ({Object.keys(respostas).length}/6 respondidas)
@@ -568,60 +572,58 @@ function VistoriaFormContent() {
             PASSO 3: FOTOS
         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         {passo === 3 && (
-          <Card className="p-6 space-y-5 animate-in fade-in duration-200">
+          <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-5 mx-4 mb-4 space-y-5 animate-in fade-in duration-200">
             <div className="flex items-center justify-between">
               <div className="space-y-1">
-                <h1 className="text-xl font-bold text-white tracking-tight">
+                <h1 className="text-xl font-bold text-gray-900 tracking-tight">
                   Registro Fotográfico
                 </h1>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-gray-500">
                   Fotografe o imóvel e eventuais manifestações patológicas
                 </p>
               </div>
 
               {fotos.length > 0 && (
-                <Badge variant="azul">
+                <span className="bg-blue-50 text-blue-700 border border-blue-200 rounded-full px-3 py-1 text-xs font-semibold">
                   {fotos.length} {fotos.length === 1 ? 'foto' : 'fotos'}
-                </Badge>
+                </span>
               )}
             </div>
 
-            {/* Área de upload com border-dashed */}
+            {/* Botão câmera: bg-white border-2 border-dashed border-gray-300 rounded-2xl p-8 */}
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={uploadingFoto}
-              className="w-full min-h-[120px] bg-slate-800/30 border-2 border-dashed border-slate-600 hover:border-blue-500 active:scale-[0.99] rounded-2xl flex flex-col items-center justify-center gap-2 p-8 text-slate-300 hover:text-white transition-all cursor-pointer shadow-lg"
+              className="w-full bg-white border-2 border-dashed border-gray-300 rounded-2xl p-8 text-center hover:border-blue-400 hover:bg-blue-50 transition-all cursor-pointer flex flex-col items-center justify-center gap-2"
             >
               {uploadingFoto ? (
                 <>
-                  <Loader2 className="w-7 h-7 text-blue-500 animate-spin" />
-                  <span className="text-xs font-semibold text-slate-300">
+                  <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+                  <span className="text-xs font-semibold text-gray-600">
                     Enviando foto para a nuvem...
                   </span>
                 </>
               ) : (
                 <>
-                  <div className="w-12 h-12 rounded-full bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400">
-                    <Camera className="w-6 h-6" />
-                  </div>
-                  <span className="text-sm font-semibold text-white">
-                    Tirar Foto com a Câmera
+                  <Camera className="w-8 h-8 text-gray-400" />
+                  <span className="text-sm font-medium text-gray-600">
+                    Adicionar Foto
                   </span>
-                  <span className="text-xs text-slate-500">
+                  <span className="text-xs text-gray-400">
                     Toque para abrir a câmera ou galeria (mínimo 1 foto)
                   </span>
                 </>
               )}
             </button>
 
-            {/* Preview das fotos em grid 2 colunas */}
+            {/* Grid 2 colunas rounded-xl overflow-hidden com Overlay X: bg-red-500 text-white rounded-full */}
             {fotos.length > 0 && (
               <div className="grid grid-cols-2 gap-3 pt-2">
                 {fotos.map((url, idx) => (
                   <div
                     key={idx}
-                    className="relative aspect-square rounded-xl overflow-hidden bg-slate-900 border border-slate-700/50 shadow-md group"
+                    className="relative aspect-square rounded-xl overflow-hidden border border-gray-200 shadow-sm group"
                   >
                     <img
                       src={url}
@@ -631,10 +633,10 @@ function VistoriaFormContent() {
                     <button
                       type="button"
                       onClick={() => handleRemoveFoto(url)}
-                      className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/70 hover:bg-red-600 text-white flex items-center justify-center transition cursor-pointer"
+                      className="absolute top-2 right-2 w-7 h-7 rounded-full bg-red-500 text-white flex items-center justify-center transition hover:bg-red-600 cursor-pointer shadow"
                       title="Excluir foto"
                     >
-                      <Trash2 className="w-3.5 h-3.5" />
+                      <X className="w-4 h-4 text-white" />
                     </button>
                   </div>
                 ))}
@@ -647,6 +649,7 @@ function VistoriaFormContent() {
                 fullWidth
                 disabled={!canAdvancePasso3}
                 onClick={() => setPasso(4)}
+                className="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold rounded-xl px-6 py-3 min-h-[48px] w-full transition-all duration-200 shadow-sm"
               >
                 <span>
                   Próximo ({fotos.length} foto{fotos.length === 1 ? '' : 's'})
@@ -654,41 +657,41 @@ function VistoriaFormContent() {
                 <ArrowRight className="w-4 h-4" />
               </Button>
             </div>
-          </Card>
+          </div>
         )}
 
         {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
             PASSO 4: ASSINATURA E LOCALIZAÇÃO
         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         {passo === 4 && (
-          <div className="space-y-5 animate-in fade-in duration-200">
-            <div className="space-y-1 px-1">
-              <h1 className="text-xl font-bold text-white tracking-tight">
+          <div className="space-y-4 animate-in fade-in duration-200 mx-4 mb-4">
+            <div className="space-y-1">
+              <h1 className="text-xl font-bold text-gray-900 tracking-tight">
                 Assinatura e Validação
               </h1>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-gray-500">
                 Assine no quadro abaixo e confirme sua geolocalização
               </p>
             </div>
 
-            {/* Card Assinatura */}
-            <Card className="p-5 space-y-3">
+            {/* Card Assinatura: Canvas bg-white border-2 border-gray-300 rounded-xl (traço #1e3a5f) */}
+            <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-5 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <span className="text-xs font-semibold uppercase tracking-wide text-gray-600">
                   Assine com o dedo *
                 </span>
                 {hasSignature && (
                   <button
                     type="button"
                     onClick={clearCanvas}
-                    className="text-xs text-slate-400 hover:text-red-400 transition cursor-pointer"
+                    className="text-xs text-gray-500 hover:text-red-600 transition cursor-pointer"
                   >
                     Limpar
                   </button>
                 )}
               </div>
 
-              <div className="rounded-xl overflow-hidden border border-slate-600 bg-white shadow-inner touch-none">
+              <div className="rounded-xl overflow-hidden border-2 border-gray-300 bg-white touch-none">
                 <canvas
                   ref={canvasRef}
                   onMouseDown={startDrawing}
@@ -702,40 +705,42 @@ function VistoriaFormContent() {
                 />
               </div>
 
-              <div className="flex justify-between items-center text-[11px] text-slate-500 pt-1">
-                <span>Traço técnico com carimbo temporal</span>
+              <div className="flex justify-between items-center text-[11px] text-gray-500 pt-1">
+                <span>Traço técnico (#1e3a5f) com carimbo</span>
                 {hasSignature && (
-                  <span className="text-emerald-400 font-medium inline-flex items-center gap-1">
+                  <span className="text-green-700 font-medium inline-flex items-center gap-1">
                     <Check className="w-3 h-3" /> Assinado
                   </span>
                 )}
               </div>
-            </Card>
+            </div>
 
-            {/* Card de GPS: bg-slate-800/50 rounded-xl p-4 com ícone MapPin verde se capturado */}
-            <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4 space-y-3 shadow-md">
+            {/* GPS card: bg-gray-50 border border-gray-200 rounded-xl p-3 */}
+            <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <span className="text-xs font-semibold uppercase tracking-wide text-gray-600">
                   Coordenadas GPS *
                 </span>
                 {geoLoc ? (
-                  <Badge variant="verde">
+                  <span className="bg-green-50 text-green-700 border border-green-200 rounded-full px-3 py-0.5 text-xs font-semibold inline-flex items-center gap-1">
                     <CheckCircle2 className="w-3 h-3" /> Confirmada
-                  </Badge>
+                  </span>
                 ) : (
-                  <Badge variant="slate">Pendente</Badge>
+                  <span className="bg-gray-100 text-gray-700 border border-gray-200 rounded-full px-3 py-0.5 text-xs font-semibold">
+                    Pendente
+                  </span>
                 )}
               </div>
 
               {geoLoc ? (
-                <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-700 text-xs text-slate-300 font-mono flex items-center gap-2">
-                  <MapPin className="w-4 h-4 text-emerald-400 shrink-0" />
+                <div className="p-3 rounded-lg bg-white border border-gray-200 text-xs text-gray-700 font-mono flex items-center gap-2">
+                  <MapPin className="w-4 h-4 text-green-600 shrink-0" />
                   <span>
                     Lat: {geoLoc.lat} | Lng: {geoLoc.lng}
                   </span>
                 </div>
               ) : (
-                <p className="text-xs text-slate-400 leading-relaxed">
+                <p className="text-xs text-gray-500 leading-relaxed">
                   A captura das coordenadas geográficas é obrigatória para certificar a presença física no canteiro.
                 </p>
               )}
@@ -749,7 +754,7 @@ function VistoriaFormContent() {
               >
                 {!capturingGeo && (
                   <>
-                    <MapPin className="w-4 h-4 text-blue-400" />
+                    <MapPin className="w-4 h-4 text-blue-600" />
                     <span>{geoLoc ? 'Atualizar Localização GPS' : 'Capturar Localização GPS'}</span>
                   </>
                 )}
@@ -765,7 +770,7 @@ function VistoriaFormContent() {
                 disabled={!canSubmitPasso4 || submitting}
                 loading={submitting}
                 onClick={handleSubmitVistoria}
-                className="font-bold shadow-2xl shadow-blue-600/40"
+                className="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold rounded-xl px-6 py-3 min-h-[48px] w-full transition-all duration-200 shadow-sm"
               >
                 {!submitting && (
                   <>
@@ -780,8 +785,8 @@ function VistoriaFormContent() {
       </div>
 
       {/* Footer minimalista */}
-      <footer className="w-full text-center py-4 text-xs text-slate-500 border-t border-slate-700/50 pb-safe">
-        Consorcio Pacote 15 e 19 • MetricLab
+      <footer className="w-full text-center py-4 text-xs text-gray-400 border-t border-gray-200 bg-white pb-safe">
+        Consórcio Pacote 15 e 19 • MetricLab
       </footer>
     </main>
   );
@@ -791,8 +796,8 @@ export default function VistoriaNovoPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-900 to-slate-800 text-white flex items-center justify-center p-6">
-          <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+        <div className="min-h-screen bg-gray-50 text-gray-900 flex items-center justify-center p-6">
+          <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
         </div>
       }
     >

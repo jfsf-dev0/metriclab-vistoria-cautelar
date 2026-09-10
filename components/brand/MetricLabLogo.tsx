@@ -41,11 +41,11 @@ export function MetricLabLogo({
         <div className="flex flex-col text-left">
           <span
             className={cn(
-              'font-extrabold tracking-wider text-white uppercase leading-none font-sans',
+              'font-extrabold tracking-wider text-gray-900 uppercase leading-none font-sans',
               textSizes[size]
             )}
           >
-            Metric<span className="text-blue-400">Lab</span>
+            Metric<span className="text-blue-600">Lab</span>
           </span>
         </div>
       )}

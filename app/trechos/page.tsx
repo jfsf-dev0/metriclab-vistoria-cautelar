@@ -80,90 +80,88 @@ export default function TrechosPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-900 to-slate-800 text-white flex flex-col justify-between">
-      {/* Header Mobile Padrão: h-14, logo ML, Trechos Disponíveis, saudação */}
+    <main className="min-h-screen bg-gray-50 text-gray-900 flex flex-col justify-between">
+      {/* Header branco fixo */}
       <HeaderMobile
         title="Trechos Disponíveis"
         showLogo={true}
         rightAction={
-          <span className="text-xs font-medium text-slate-300">
-            Olá, <strong className="text-white">{session?.nome?.split(' ')[0] || 'Inspetor'}</strong>
+          <span className="text-xs font-medium text-gray-500">
+            Olá, <strong className="text-gray-900">{session?.nome?.split(' ')[0] || 'Inspetor'}</strong>
           </span>
         }
       />
 
       {/* Corpo da página */}
-      <div className="flex-1 px-4 py-6 max-w-md w-full mx-auto space-y-5 animate-in fade-in duration-200">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
-            Trechos Liberados
+      <div className="flex-1 py-6 max-w-md w-full mx-auto space-y-4 animate-in fade-in duration-200">
+        {/* Título seção */}
+        <div className="px-4">
+          <h1 className="text-lg font-bold text-gray-900">
+            Trechos Disponíveis
           </h1>
-          <p className="text-xs text-slate-400 mt-1">
-            Consorcio Pacote 15 e 19 • Selecione o trecho para vistoriar
+          <p className="text-sm text-gray-500 mt-0.5">
+            Consórcio Pacote 15 e 19 • Selecione o trecho para vistoriar
           </p>
         </div>
 
         {/* Loading com Skeleton Loaders */}
         {loading ? (
-          <div className="space-y-3">
+          <div className="space-y-3 px-4">
             <TrechoCardSkeleton />
             <TrechoCardSkeleton />
             <TrechoCardSkeleton />
           </div>
         ) : trechos.length === 0 ? (
-          /* Estado vazio no padrão mlab */
-          <Card className="p-8 text-center flex flex-col items-center justify-center space-y-3 mt-4 border-dashed border-slate-700">
-            <div className="w-14 h-14 rounded-full bg-slate-800 border border-slate-700/60 flex items-center justify-center text-slate-400 shadow-inner">
-              <Inbox className="w-7 h-7" />
+          /* Empty state: ícone cinza + "Nenhum trecho disponível" text-gray-500 */
+          <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-8 mx-4 text-center flex flex-col items-center justify-center space-y-3">
+            <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-gray-400">
+              <Inbox className="w-6 h-6" />
             </div>
-            <h3 className="text-sm font-bold text-slate-200">
-              Nenhum trecho liberado no momento
+            <h3 className="text-sm font-semibold text-gray-500">
+              Nenhum trecho disponível
             </h3>
-            <p className="text-xs text-slate-400 max-w-xs leading-relaxed">
-              Aguarde a liberação das etapas pelo planejamento no painel de gestão para iniciar novas vistorias.
+            <p className="text-xs text-gray-400 max-w-xs leading-relaxed">
+              Aguarde a liberação das etapas pelo planejamento para iniciar novas vistorias.
             </p>
-          </Card>
+          </div>
         ) : (
-          /* Lista de Cards com design system */
+          /* Cards trecho */
           <div className="space-y-3">
             {trechos.map((trecho) => (
-              <Card
+              <div
                 key={trecho.id}
-                hoverable
                 onClick={() => handleSelectTrecho(trecho.id)}
-                className="cursor-pointer flex items-center justify-between gap-3 active:scale-[0.98] transition-all duration-200"
+                className="bg-white border border-gray-200 rounded-2xl shadow-sm p-4 mx-4 mb-3 hover:border-blue-300 hover:shadow-md cursor-pointer transition-all flex items-center justify-between gap-3 active:scale-[0.99]"
               >
-                <div className="space-y-2 flex-1 pr-2">
-                  <h3 className="text-sm sm:text-base font-bold text-white leading-snug">
+                <div className="space-y-1.5 flex-1 pr-2">
+                  <h3 className="text-sm sm:text-base font-semibold text-gray-900 leading-snug">
                     {trecho.nome}
                   </h3>
 
-                  <div className="flex flex-wrap items-center gap-2 text-xs">
-                    <span className="text-slate-400 font-medium inline-flex items-center gap-1">
-                      <MapPin className="w-3.5 h-3.5 text-slate-400" />
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-gray-500 text-sm inline-flex items-center gap-1">
+                      <MapPin className="w-3.5 h-3.5 text-gray-400" />
                       Km {trecho.km_inicio} → {trecho.km_fim}
                     </span>
 
                     {trecho.etapa_planejamento && (
-                      <Badge variant="azul">
+                      <span className="bg-blue-50 text-blue-700 border border-blue-200 rounded-full px-3 py-1 text-xs font-semibold">
                         {trecho.etapa_planejamento}
-                      </Badge>
+                      </span>
                     )}
                   </div>
                 </div>
 
-                <div className="w-8 h-8 rounded-full bg-slate-800/80 border border-slate-700/50 flex items-center justify-center text-slate-400 shrink-0">
-                  <ChevronRight className="w-4 h-4 text-slate-400" />
-                </div>
-              </Card>
+                <ChevronRight className="w-5 h-5 text-gray-400 shrink-0" />
+              </div>
             ))}
           </div>
         )}
       </div>
 
       {/* Footer minimalista */}
-      <footer className="w-full text-center py-4 text-xs text-slate-500 border-t border-slate-700/50 pb-safe">
-        MetricLab • Consorcio Pacote 15 e 19
+      <footer className="w-full text-center py-4 text-xs text-gray-400 border-t border-gray-200 bg-white pb-safe">
+        MetricLab • Consórcio Pacote 15 e 19
       </footer>
     </main>
   );

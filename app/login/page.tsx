@@ -94,22 +94,21 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-900 to-slate-800 text-white flex flex-col justify-between p-4 sm:p-6 select-none relative pb-safe">
-      {/* Header Pequeno: Logo MetricLab + Badge Consórcio */}
-      <header className="w-full flex items-center justify-between pb-4 border-b border-slate-700/50">
-        <MetricLabLogo size="sm" showText={true} />
-        <Badge variant="azul">Pacote 15 e 19</Badge>
-      </header>
-
-      {/* Card Centralizado no padrão mlab */}
+    <main className="min-h-screen bg-gray-50 text-gray-900 flex flex-col justify-between p-4 sm:p-6 select-none relative pb-safe">
       <div className="w-full max-w-sm mx-auto my-auto py-6">
-        <Card className="p-6 sm:p-7 space-y-6">
+        {/* Logo MetricLab pequeno acima do card */}
+        <div className="flex justify-center mb-6">
+          <MetricLabLogo size="md" showText={true} />
+        </div>
+
+        {/* Card central */}
+        <Card className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 mx-4 space-y-6">
           <div className="space-y-1.5 text-center">
-            <h1 className="text-xl font-bold text-white tracking-tight">
-              Identificação
+            <h1 className="text-xl font-bold text-gray-900 tracking-tight">
+              Acesso
             </h1>
-            <p className="text-xs text-slate-400">
-              Acesse sua conta para conduzir a vistoria cautelar
+            <p className="text-sm text-gray-500">
+              Use as credenciais enviadas via WhatsApp
             </p>
           </div>
 
@@ -154,7 +153,7 @@ export default function LoginPage() {
                 variant="primary"
                 fullWidth
                 loading={loading}
-                className="font-semibold shadow-lg shadow-blue-600/20"
+                className="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold rounded-xl px-6 py-3 min-h-[48px] w-full transition-all duration-200 shadow-sm"
               >
                 {!loading && (
                   <>
@@ -166,16 +165,16 @@ export default function LoginPage() {
             </div>
           </form>
 
-          {/* Texto Auxiliar text-slate-500 text-sm */}
-          <p className="text-sm text-center text-slate-500 pt-1 leading-relaxed">
-            Suas credenciais foram enviadas via WhatsApp
+          {/* Texto auxiliar */}
+          <p className="text-xs text-center text-gray-400 pt-1 leading-relaxed">
+            MetricLab • Inteligência Operacional
           </p>
         </Card>
       </div>
 
       {/* Footer minimalista */}
-      <footer className="w-full text-center py-2 text-xs text-slate-500">
-        MetricLab • Inteligência Operacional
+      <footer className="w-full text-center py-2 text-xs text-gray-400">
+        MetricLab • Consórcio Pacote 15 e 19
       </footer>
     </main>
   );

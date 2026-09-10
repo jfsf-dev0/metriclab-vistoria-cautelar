@@ -20,7 +20,7 @@ export function HeaderMobile({
   return (
     <header
       className={cn(
-        'sticky top-0 z-30 h-14 w-full bg-slate-900/95 backdrop-blur border-b border-slate-700/50 px-4 flex items-center justify-between transition-all duration-200 select-none',
+        'sticky top-0 z-30 h-14 w-full bg-white border-b border-gray-200 shadow-sm px-4 flex items-center justify-between transition-all duration-200 select-none',
         className
       )}
     >
@@ -36,7 +36,7 @@ export function HeaderMobile({
       {/* Center: Title */}
       {title && (
         <div className="flex-1 text-center px-2">
-          <h2 className="text-xs sm:text-sm font-bold text-white truncate tracking-tight">
+          <h2 className="text-xs sm:text-sm font-bold text-gray-900 truncate tracking-tight">
             {title}
           </h2>
         </div>
