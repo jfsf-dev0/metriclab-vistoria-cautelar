@@ -67,3 +67,21 @@ Reestruturar completamente o layout e a arquitetura de interface do PWA `jfsf-de
 ### Verificação
 - Build Next.js 14 executado com sucesso e 0 erros de compilação ou tipagem.
 
+---
+
+## Data: 10 de Setembro de 2026
+
+### Atualização do Fluxo de Login (Fiel ao Gestão)
+- **Design System & Layout**:
+  - Fundo `#F0F0F0`, card centralizado `bg-white`, border 1px `#E5E5E3`, radius 12px, padding 32px, max-width 380px.
+  - Logo `m.` com ponto `#F5A623`, título "Vistoria Cautelar" e subtítulo "Pacote 15 e 19".
+- **Fluxo com 3 Estados**:
+  - **Estado 1 (Inicial)**: Campo underline "Email ou Telefone", dois botões lado a lado ("Entrar com chave" e "Código único"), divisor "ou" e botão preto full-width "Entrar".
+  - **Estado 2A (Chave)**: Campo com código de acesso de 6 dígitos (autofocus, password, hint Demo: 123456), validação com bypass demo 123456 e consulta na tabela `demo_lote15_leads`. Shake animation caso inválido.
+  - **Estado 2B (Código Único)**: Mensagem "Enviamos um código para...", campo de 6 dígitos com espaçamento monospace, bypass 123456 para demo e botão "Confirmar".
+- **Splash (`/`)**:
+  - Fundo `#F0F0F0`, display "Pacote 15 e 19", eyebrow "PROPOSTA", subtítulo e botão "Entrar" full-width.
+- **Build & Verificação**:
+  - `npm run build` executado com 0 erros TypeScript.
+
+

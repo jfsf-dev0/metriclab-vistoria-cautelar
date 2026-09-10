@@ -2,6 +2,8 @@ export interface UserSession {
   lead_id: string;
   telefone: string;
   nome: string;
+  trecho_nome?: string;
+  pacote?: string;
 }
 
 export function getSession(): UserSession | null {
