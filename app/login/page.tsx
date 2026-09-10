@@ -1,24 +1,51 @@
 'use client';
 
-import React, { useState, useEffect, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import React, { useState, useEffect, useRef, Suspense } from 'react';
+import { useRouter } from 'next/navigation';
 import { Lock, Smartphone, Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { setSession } from '@/lib/auth';
 
-type Estado = 'inicial' | 'chave' | 'codigo_unico';
+type Metodo = 'chave' | 'codigo_unico';
 
 function LoginContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
 
-  const [estado, setEstado] = useState<Estado>('inicial');
+  // Etapas:
+  // 0 = Entrada (Logo, títulos, botão Entrar)
+  // 1 = Campo Email/Telefone
+  // 2 = Escolha de Método (aparece automaticamente ao digitar)
+  // 3 = Código (Chave de Acesso ou Código Único)
+  const [etapa, setEtapa] = useState<number>(0);
   const [identificador, setIdentificador] = useState('');
-  const [codigoAcesso, setCodigoAcesso] = useState('');
-  const [codigoOtp, setCodigoOtp] = useState('');
+  const [metodo, setMetodo] = useState<Metodo | null>(null);
+  const [codigo, setCodigo] = useState('');
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const [shaking, setShaking] = useState(false);
+
+  const emailInputRef = useRef<HTMLInputElement>(null);
+  const codigoInputRef = useRef<HTMLInputElement>(null);
+
+  // Foco automático ao entrar na Etapa 1
+  useEffect(() => {
+    if (etapa === 1) {
+      const timer = setTimeout(() => {
+        emailInputRef.current?.focus();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [etapa]);
+
+  // Foco automático ao entrar na Etapa 3 (seleção do método)
+  useEffect(() => {
+    if (metodo) {
+      const timer = setTimeout(() => {
+        codigoInputRef.current?.focus();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [metodo]);
 
   const triggerShake = (mensagem?: string) => {
     setShaking(true);
@@ -27,45 +54,77 @@ function LoginContent() {
   };
 
   const handleVoltar = () => {
-    setEstado('inicial');
-    setCodigoAcesso('');
-    setCodigoOtp('');
+    setEtapa(0);
+    setIdentificador('');
+    setMetodo(null);
+    setCodigo('');
     setErro(null);
   };
 
-  // ESTADO 2A: Validação com Chave de Acesso
-  const handleEntrarComChave = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
+  const handleIdentificadorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setIdentificador(val);
     setErro(null);
 
-    const inputLimpo = identificador.trim();
-    const codigoLimpo = codigoAcesso.trim();
+    // Quando usuário digita qualquer caractere → ETAPA 2 automático
+    if (val.trim().length > 0) {
+      if (etapa < 2) {
+        setEtapa(2);
+      }
+    } else {
+      // Se apagar tudo, volta para etapa 1 e reseta método/código
+      setEtapa(1);
+      setMetodo(null);
+      setCodigo('');
+    }
+  };
 
-    if (!inputLimpo) {
-      triggerShake('Informe seu e-mail ou telefone.');
+  const handleSelectMetodo = (novoMetodo: Metodo) => {
+    setMetodo(novoMetodo);
+    setCodigo('');
+    setErro(null);
+  };
+
+  const handleCodigoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setCodigo(val);
+    setErro(null);
+  };
+
+  const handleSubmit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+
+    // Se estiver na etapa 0, avança para etapa 1
+    if (etapa === 0) {
+      setEtapa(1);
       return;
     }
 
-    if (!codigoLimpo) {
-      triggerShake('Informe o código de acesso de 6 dígitos.');
+    // Se ainda não escolheu método ou código não tem 6 dígitos, não submete
+    if (!metodo || codigo.length < 6) {
       return;
     }
 
+    setErro(null);
     setLoading(true);
 
-    // Bypass Demo oficial: 123456
+    const inputLimpo = identificador.trim();
+    const codigoLimpo = codigo.trim();
+
+    // Validação Demo oficial: aceita 123456 para qualquer input
     if (codigoLimpo === '123456') {
       setSession({
         lead_id: 'demo-lead-123456',
         nome: 'Inspetor Demo — Pacote 15 e 19',
-        telefone: inputLimpo,
+        telefone: inputLimpo || '+55 (11) 98765-4321',
         trecho_nome: 'Pacote 15 e 19',
         pacote: '15 e 19',
       });
-      router.push('/trechos');
+      router.push('/home');
       return;
     }
 
+    // Busca Supabase demo_lote15_leads
     try {
       const isEmail = inputLimpo.includes('@');
       let query = supabase
@@ -75,10 +134,10 @@ function LoginContent() {
         .neq('status', 'expirado');
 
       if (isEmail) {
-        query = query.eq('email', inputLimpo.toLowerCase());
+        query = query.ilike('email', inputLimpo.toLowerCase());
       } else {
         const cleanDigits = inputLimpo.replace(/\D/g, '');
-        query = query.ilike('telefone', `%${cleanDigits}%`);
+        query = query.ilike('telefone', `%${cleanDigits || inputLimpo}%`);
       }
 
       const { data, error } = await query.maybeSingle();
@@ -97,362 +156,440 @@ function LoginContent() {
         pacote: data.pacote || '15 e 19',
       });
 
-      router.push('/trechos');
+      router.push('/home');
     } catch (err) {
-      console.error('[handleEntrarComChave]', err);
+      console.error('[login validation error]', err);
       setLoading(false);
       triggerShake('Código inválido');
     }
   };
 
-  // ESTADO 2B: Validação com Código Único (Demo 123456)
-  const handleConfirmarCodigoUnico = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    setErro(null);
+  // Botão ativação
+  const isCodigoValido = codigo.length === 6;
+  const isBotaoAtivo =
+    etapa === 0 ? true : metodo !== null && isCodigoValido && !loading;
 
-    const inputLimpo = identificador.trim();
-    const codigoLimpo = codigoOtp.trim();
-
-    if (!codigoLimpo) {
-      triggerShake('Digite o código recebido.');
-      return;
-    }
-
-    setLoading(true);
-
-    // Aceita 123456 para qualquer input (Demo)
-    if (codigoLimpo === '123456') {
-      setSession({
-        lead_id: 'demo-lead-123456',
-        nome: 'Inspetor Demo — Pacote 15 e 19',
-        telefone: inputLimpo || '+55 (11) 98765-4321',
-        trecho_nome: 'Pacote 15 e 19',
-        pacote: '15 e 19',
-      });
-      router.push('/trechos');
-      return;
-    }
-
-    // Busca no Supabase caso seja outro código existente
-    try {
-      const { data, error } = await supabase
-        .from('demo_lote15_leads')
-        .select('id, nome, telefone, email, status, trecho_nome, pacote')
-        .eq('chave_acesso', codigoLimpo)
-        .neq('status', 'expirado')
-        .maybeSingle();
-
-      if (error || !data) {
-        setLoading(false);
-        triggerShake('Código inválido');
-        return;
-      }
-
-      setSession({
-        lead_id: data.id,
-        nome: data.nome,
-        telefone: data.telefone || inputLimpo,
-        trecho_nome: data.trecho_nome || 'Pacote 15 e 19',
-        pacote: data.pacote || '15 e 19',
-      });
-
-      router.push('/trechos');
-    } catch (err) {
-      console.error('[handleConfirmarCodigoUnico]', err);
-      setLoading(false);
-      triggerShake('Código inválido');
-    }
-  };
+  const textoBotao =
+    etapa === 0
+      ? 'Entrar'
+      : metodo === 'codigo_unico'
+      ? 'Confirmar'
+      : 'Entrar';
 
   return (
     <div
-      className={`w-full max-w-[380px] bg-white rounded-[12px] border border-[#E5E5E3] p-8 shadow-[0_2px_8px_rgba(0,0,0,0.04)] transition-all duration-300 ease-in-out ${
-        shaking ? 'animate-shake' : ''
-      }`}
+      style={{
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: 'calc(100% - 48px)',
+        maxWidth: '380px',
+        margin: 'auto',
+        backgroundColor: '#FFFFFF',
+        border: '1px solid #E5E5E3',
+        borderRadius: '16px',
+        padding: '32px 28px',
+        transition: 'all 300ms ease',
+        boxSizing: 'border-box',
+      }}
+      className={shaking ? 'animate-shake' : ''}
     >
-      {/* Logo */}
-      <div className="text-center">
-        <span className="text-[28px] font-bold text-[#111111] leading-none tracking-tight select-none">
-          m<span className="text-[#F5A623]">.</span>
-        </span>
-      </div>
-
-      {/* Título e Subtítulo */}
-      <div className="text-center mt-4">
-        <h1 className="text-[22px] font-bold text-[#111111] leading-tight">
-          Vistoria Cautelar
-        </h1>
-        <p className="text-[13px] font-normal text-[#9B9B9B] mt-1">
-          Pacote 15 e 19
-        </p>
-      </div>
-
-      {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-          ESTADO 1 — INICIAL
-          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-      {estado === 'inicial' && (
-        <div className="mt-6 space-y-5 animate-in fade-in-0 duration-200">
-          <div>
-            <input
-              type="text"
-              value={identificador}
-              onChange={(e) => {
-                setIdentificador(e.target.value);
-                setErro(null);
-              }}
-              placeholder="seu@email.com ou +55 (11) 99999-9999"
-              autoFocus
-              className="w-full border-0 border-b border-[#E5E5E3] bg-transparent py-2.5 text-[15px] text-[#111111] placeholder:text-[#9B9B9B] focus:border-[#111111] focus:outline-none transition-colors"
-            />
-          </div>
-
-          {erro && (
-            <p className="text-[12px] text-[#dc2626] font-medium text-center">
-              {erro}
-            </p>
-          )}
-
-          {/* Dois botões lado a lado */}
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                setEstado('chave');
-                setErro(null);
-              }}
-              className="flex-1 h-[44px] bg-white border border-[#E5E5E3] rounded-[8px] inline-flex items-center justify-center gap-2 hover:bg-[#F9F9F8] transition-colors cursor-pointer select-none"
-            >
-              <Lock className="w-4 h-4 text-[#111111]" />
-              <span className="text-[13px] font-medium text-[#111111]">
-                Entrar com chave
-              </span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setEstado('codigo_unico');
-                setErro(null);
-              }}
-              className="flex-1 h-[44px] bg-white border border-[#E5E5E3] rounded-[8px] inline-flex items-center justify-center gap-2 hover:bg-[#F9F9F8] transition-colors cursor-pointer select-none"
-            >
-              <Smartphone className="w-4 h-4 text-[#111111]" />
-              <span className="text-[13px] font-medium text-[#111111]">
-                Código único
-              </span>
-            </button>
-          </div>
-
-          {/* Divider */}
-          <div className="flex items-center gap-3">
-            <div className="flex-1 h-px bg-[#E5E5E3]" />
-            <span className="text-[12px] text-[#9B9B9B]">ou</span>
-            <div className="flex-1 h-px bg-[#E5E5E3]" />
-          </div>
-
-          {/* Botão Entrar preto full-width */}
-          <button
-            type="button"
-            onClick={() => {
-              setEstado('chave');
-              setErro(null);
+      <form onSubmit={handleSubmit} className="w-full flex flex-col">
+        {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            LOGO CENTRAL
+            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+        <div className="text-center select-none">
+          <span
+            style={{
+              fontFamily: 'Inter, sans-serif',
+              fontSize: '28px',
+              fontWeight: 700,
+              lineHeight: 1,
+              letterSpacing: '-0.5px',
             }}
-            className="w-full h-[44px] bg-[#111111] hover:bg-black text-white text-[14px] font-medium rounded-[8px] transition-colors cursor-pointer flex items-center justify-center"
           >
-            Entrar
-          </button>
+            <span style={{ color: '#111111' }}>m</span>
+            <span style={{ color: '#F5A623' }}>.</span>
+          </span>
+        </div>
 
-          {/* Rodapé Demo */}
-          <p className="text-[11px] text-[#C4C4C2] text-center mt-4">
-            Demo: use o código 123456
+        {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            TÍTULO E SUBTÍTULO
+            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+        <div className="text-center mt-[16px]">
+          <h1
+            style={{
+              fontFamily: 'Inter, sans-serif',
+              fontSize: '22px',
+              fontWeight: 700,
+              color: '#111111',
+              lineHeight: 1.2,
+            }}
+          >
+            Vistoria Cautelar
+          </h1>
+          <p
+            style={{
+              fontFamily: 'Inter, sans-serif',
+              fontSize: '13px',
+              fontWeight: 400,
+              color: '#9B9B9B',
+              marginTop: '4px',
+              lineHeight: 1.2,
+            }}
+          >
+            Pacote 15 e 19
           </p>
         </div>
-      )}
 
-      {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-          ESTADO 2A — ENTRAR COM CHAVE
-          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-      {estado === 'chave' && (
-        <form
-          onSubmit={handleEntrarComChave}
-          className="mt-6 space-y-5 animate-in fade-in-0 duration-200"
-        >
-          {/* Mantém campo email/telefone */}
-          <div>
+        {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            ETAPA 1 — CAMPO EMAIL/TELEFONE
+            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+        {etapa >= 1 && (
+          <div className="mt-[24px] animate-step-in flex flex-col">
             <input
+              ref={emailInputRef}
               type="text"
               value={identificador}
-              onChange={(e) => {
-                setIdentificador(e.target.value);
-                setErro(null);
+              onChange={handleIdentificadorChange}
+              placeholder="seu@email.com ou +55 (11) 99999"
+              autoFocus
+              style={{
+                fontFamily: 'Inter, sans-serif',
+                fontSize: '15px',
+                color: '#111111',
+                border: 'none',
+                borderBottom: '1px solid #E5E5E3',
+                backgroundColor: 'transparent',
+                outline: 'none',
+                paddingBottom: '8px',
+                paddingTop: '4px',
+                width: '100%',
+                boxSizing: 'border-box',
               }}
-              placeholder="seu@email.com ou +55 (11) 99999-9999"
-              className="w-full border-0 border-b border-[#E5E5E3] bg-transparent py-2.5 text-[15px] text-[#111111] placeholder:text-[#9B9B9B] focus:border-[#111111] focus:outline-none transition-colors"
+              className="placeholder:text-[#9B9B9B] focus:border-b-[#111111] transition-colors"
             />
           </div>
+        )}
 
-          {/* Novo campo: Código de Acesso */}
-          <div>
+        {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            ETAPA 2 — ESCOLHA DO MÉTODO
+            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+        {etapa >= 2 && identificador.trim().length > 0 && (
+          <div className="mt-[20px] animate-step-in flex flex-col">
+            <div className="flex gap-[8px] w-full">
+              {/* Botão Entrar com chave */}
+              <button
+                type="button"
+                onClick={() => handleSelectMetodo('chave')}
+                style={{
+                  height: '44px',
+                  borderRadius: '8px',
+                  backgroundColor: metodo === 'chave' ? '#F7F7F7' : '#FFFFFF',
+                  border: `1px solid ${
+                    metodo === 'chave' ? '#111111' : '#E5E5E3'
+                  }`,
+                  fontFamily: 'Inter, sans-serif',
+                  fontSize: '13px',
+                  fontWeight: 500,
+                  color: '#111111',
+                  transition: 'all 200ms ease',
+                }}
+                className="flex-1 inline-flex items-center justify-center gap-2 cursor-pointer select-none"
+              >
+                <Lock size={15} color="#111111" />
+                <span>Entrar com chave</span>
+              </button>
+
+              {/* Botão Código único */}
+              <button
+                type="button"
+                onClick={() => handleSelectMetodo('codigo_unico')}
+                style={{
+                  height: '44px',
+                  borderRadius: '8px',
+                  backgroundColor:
+                    metodo === 'codigo_unico' ? '#F7F7F7' : '#FFFFFF',
+                  border: `1px solid ${
+                    metodo === 'codigo_unico' ? '#111111' : '#E5E5E3'
+                  }`,
+                  fontFamily: 'Inter, sans-serif',
+                  fontSize: '13px',
+                  fontWeight: 500,
+                  color: '#111111',
+                  transition: 'all 200ms ease',
+                }}
+                className="flex-1 inline-flex items-center justify-center gap-2 cursor-pointer select-none"
+              >
+                <Smartphone size={15} color="#111111" />
+                <span>Código único</span>
+              </button>
+            </div>
+
+            {/* Aviso Demo na Etapa 2 se método ainda não foi escolhido */}
+            {!metodo && (
+              <p
+                style={{
+                  fontFamily: 'Inter, sans-serif',
+                  fontSize: '11px',
+                  color: '#C4C4C2',
+                  textAlign: 'center',
+                  marginTop: '8px',
+                }}
+              >
+                Demo: use o código 123456
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            ETAPA 3A — ENTRAR COM CHAVE
+            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+        {metodo === 'chave' && (
+          <div className="mt-[20px] animate-step-in flex flex-col">
             <div className="flex items-center justify-between">
-              <label className="text-[10px] font-medium uppercase tracking-[0.5px] text-[#9B9B9B] block">
-                CÓDIGO DE ACESSO (6 DÍGITOS)
+              <label
+                style={{
+                  fontFamily: 'Inter, sans-serif',
+                  fontSize: '10px',
+                  fontWeight: 500,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px',
+                  color: '#9B9B9B',
+                }}
+              >
+                CÓDIGO DE ACESSO
               </label>
-              <span className="text-[10px] text-[#C4C4C2]">
+              <span
+                style={{
+                  fontFamily: 'Inter, sans-serif',
+                  fontSize: '10px',
+                  color: '#C4C4C2',
+                }}
+              >
                 Demo: 123456
               </span>
             </div>
+
             <input
+              ref={codigoInputRef}
               type="password"
               maxLength={6}
-              value={codigoAcesso}
-              onChange={(e) => {
-                setCodigoAcesso(e.target.value);
-                setErro(null);
-              }}
+              value={codigo}
+              onChange={handleCodigoChange}
               placeholder="••••••"
               autoFocus
-              className="w-full border-0 border-b border-[#E5E5E3] bg-transparent py-2 text-[15px] text-[#111111] tracking-[4px] placeholder:text-[#9B9B9B] focus:border-[#111111] focus:outline-none transition-colors"
+              style={{
+                fontFamily: 'Inter, sans-serif',
+                fontSize: '15px',
+                color: '#111111',
+                letterSpacing: '4px',
+                border: 'none',
+                borderBottom: '1px solid #E5E5E3',
+                backgroundColor: 'transparent',
+                outline: 'none',
+                paddingBottom: '8px',
+                paddingTop: '6px',
+                width: '100%',
+                boxSizing: 'border-box',
+              }}
+              className="placeholder:text-[#9B9B9B] focus:border-b-[#111111] transition-colors"
             />
+
             {erro && (
-              <p className="text-[12px] text-[#dc2626] font-medium mt-1.5">
+              <p
+                style={{
+                  fontFamily: 'Inter, sans-serif',
+                  fontSize: '12px',
+                  color: '#DC2626',
+                  marginTop: '6px',
+                }}
+                className="animate-step-in"
+              >
                 {erro}
               </p>
             )}
           </div>
+        )}
 
-          {/* Botão Entrar */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full h-[44px] bg-[#111111] hover:bg-black text-white text-[14px] font-medium rounded-[8px] transition-colors cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
-          >
-            {loading ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Entrando...</span>
-              </>
-            ) : (
-              'Entrar'
-            )}
-          </button>
-
-          {/* Link Voltar */}
-          <div className="text-center pt-1">
-            <button
-              type="button"
-              onClick={handleVoltar}
-              className="text-[12px] text-[#9B9B9B] hover:text-[#111111] transition-colors cursor-pointer"
+        {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            ETAPA 3B — CÓDIGO ÚNICO
+            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+        {metodo === 'codigo_unico' && (
+          <div className="mt-[16px] animate-step-in flex flex-col">
+            <p
+              style={{
+                fontFamily: 'Inter, sans-serif',
+                fontSize: '13px',
+                color: '#6B6B6B',
+                textAlign: 'center',
+                marginBottom: '12px',
+              }}
+              className="truncate"
             >
-              ← Voltar
-            </button>
-          </div>
-        </form>
-      )}
+              Código enviado para {identificador}
+            </p>
 
-      {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-          ESTADO 2B — CÓDIGO ÚNICO
-          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-      {estado === 'codigo_unico' && (
-        <form
-          onSubmit={handleConfirmarCodigoUnico}
-          className="mt-6 space-y-5 animate-in fade-in-0 duration-200"
-        >
-          {identificador.trim() ? (
-            <div className="text-center">
-              <p className="text-[13px] text-[#6B6B6B]">
-                Enviamos um código para
-              </p>
-              <p className="text-[13px] font-medium text-[#111111] mt-0.5 truncate">
-                {identificador}
-              </p>
-            </div>
-          ) : (
-            <div>
-              <input
-                type="text"
-                value={identificador}
-                onChange={(e) => {
-                  setIdentificador(e.target.value);
-                  setErro(null);
-                }}
-                placeholder="seu@email.com ou +55 (11) 99999-9999"
-                className="w-full border-0 border-b border-[#E5E5E3] bg-transparent py-2.5 text-[15px] text-[#111111] placeholder:text-[#9B9B9B] focus:border-[#111111] focus:outline-none transition-colors"
-              />
-            </div>
-          )}
-
-          {/* Campo Código Recebido */}
-          <div>
             <div className="flex items-center justify-between">
-              <label className="text-[10px] font-medium uppercase tracking-[0.5px] text-[#9B9B9B] block">
+              <label
+                style={{
+                  fontFamily: 'Inter, sans-serif',
+                  fontSize: '10px',
+                  fontWeight: 500,
+                  textTransform: 'uppercase',
+                  color: '#9B9B9B',
+                }}
+              >
                 CÓDIGO RECEBIDO
               </label>
-              <span className="text-[10px] text-[#C4C4C2]">
-                Demo: qualquer número usa 123456
+              <span
+                style={{
+                  fontFamily: 'Inter, sans-serif',
+                  fontSize: '10px',
+                  color: '#C4C4C2',
+                }}
+              >
+                Demo: 123456
               </span>
             </div>
+
             <input
+              ref={codigoInputRef}
               type="text"
               maxLength={6}
-              value={codigoOtp}
-              onChange={(e) => {
-                const val = e.target.value.replace(/\D/g, '');
-                setCodigoOtp(val);
-                setErro(null);
-              }}
+              value={codigo}
+              onChange={handleCodigoChange}
               placeholder="000000"
               autoFocus
-              className="w-full border-0 border-b border-[#E5E5E3] bg-transparent py-2 text-[15px] text-[#111111] tracking-[6px] placeholder:text-[#C4C4C2] focus:border-[#111111] focus:outline-none transition-colors text-center"
+              style={{
+                fontFamily: 'Inter, sans-serif',
+                fontSize: '15px',
+                color: '#111111',
+                letterSpacing: '6px',
+                border: 'none',
+                borderBottom: '1px solid #E5E5E3',
+                backgroundColor: 'transparent',
+                outline: 'none',
+                paddingBottom: '8px',
+                paddingTop: '6px',
+                width: '100%',
+                boxSizing: 'border-box',
+              }}
+              className="placeholder:text-[#C4C4C2] focus:border-b-[#111111] transition-colors text-center"
             />
+
             {erro && (
-              <p className="text-[12px] text-[#dc2626] font-medium mt-1.5 text-center">
+              <p
+                style={{
+                  fontFamily: 'Inter, sans-serif',
+                  fontSize: '12px',
+                  color: '#DC2626',
+                  marginTop: '6px',
+                  textAlign: 'center',
+                }}
+                className="animate-step-in"
+              >
                 {erro}
               </p>
             )}
           </div>
+        )}
 
-          {/* Botão Confirmar */}
+        {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            BOTÃO DE AÇÃO
+            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+        <div className={etapa === 0 ? 'mt-[32px]' : 'mt-[24px]'}>
           <button
-            type="submit"
-            disabled={loading}
-            className="w-full h-[44px] bg-[#111111] hover:bg-black text-white text-[14px] font-medium rounded-[8px] transition-colors cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
+            type={etapa === 0 ? 'button' : 'submit'}
+            onClick={etapa === 0 ? () => setEtapa(1) : undefined}
+            disabled={!isBotaoAtivo}
+            style={{
+              height: '44px',
+              borderRadius: '8px',
+              backgroundColor: '#111111',
+              color: '#FFFFFF',
+              fontFamily: 'Inter, sans-serif',
+              fontSize: '14px',
+              fontWeight: 500,
+              width: '100%',
+              opacity: isBotaoAtivo ? 1.0 : 0.35,
+              pointerEvents: isBotaoAtivo ? 'auto' : 'none',
+              transition: 'all 200ms ease',
+            }}
+            className="flex items-center justify-center gap-2 cursor-pointer select-none"
           >
             {loading ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Confirmando...</span>
+                <span>Validando...</span>
               </>
             ) : (
-              'Confirmar'
+              <span>{textoBotao}</span>
             )}
           </button>
+        </div>
 
-          {/* Link Voltar */}
-          <div className="text-center pt-1">
+        {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            LINK VOLTAR (ETAPAS 1, 2 E 3)
+            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+        {etapa >= 1 && (
+          <div className="text-center mt-[14px]">
             <button
               type="button"
               onClick={handleVoltar}
-              className="text-[12px] text-[#9B9B9B] hover:text-[#111111] transition-colors cursor-pointer"
+              style={{
+                fontFamily: 'Inter, sans-serif',
+                fontSize: '12px',
+                color: '#9B9B9B',
+                background: 'none',
+                border: 'none',
+                padding: 0,
+              }}
+              className="cursor-pointer hover:text-[#111111] transition-colors select-none"
             >
               ← Voltar
             </button>
           </div>
-        </form>
-      )}
+        )}
+      </form>
     </div>
   );
 }
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen bg-[#F0F0F0] flex items-center justify-center p-4">
+    <main
+      style={{
+        backgroundColor: '#F0F0F0',
+        minHeight: '100vh',
+        width: '100%',
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
       <Suspense
         fallback={
-          <div className="w-full max-w-[380px] h-[340px] bg-white rounded-[12px] border border-[#E5E5E3] p-8 animate-pulse" />
+          <div
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: 'calc(100% - 48px)',
+              maxWidth: '380px',
+              height: '240px',
+              backgroundColor: '#FFFFFF',
+              border: '1px solid #E5E5E3',
+              borderRadius: '16px',
+            }}
+            className="animate-pulse"
+          />
         }
       >
         <LoginContent />
       </Suspense>
-    </div>
+    </main>
   );
 }

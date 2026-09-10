@@ -84,4 +84,42 @@ Reestruturar completamente o layout e a arquitetura de interface do PWA `jfsf-de
 - **Build & Verificação**:
   - `npm run build` executado com 0 erros TypeScript.
 
+---
+
+### Reestruturação da Home Unificada (Vistoria Cautelar)
+- **Header (`app/home/page.tsx`)**:
+  - Fundo `#FFFFFF`, borda inferior 1px `#E5E5E3`, padding 16px 20px, sem altura fixa (cresce com o conteúdo).
+  - Linha 1: "Olá, [nome do usuário logado]." (Inter 22px 700 `#111111`, letter-spacing -0.5px).
+  - Linha 2: "Consórcio Lote 15 · [trecho_nome]" (Inter 13px 400 `#9B9B9B`).
+- **Barra de Pendências**:
+  - Fundo `#FFFFFF`, borda inferior 1px `#E5E5E3`, padding 12px 20px.
+  - 3 contadores em linha: Vistorias pendentes (status != 'aprovada'), Incidentes abertos (status = 'aberta') e RDOs pendentes (status = 'rascunho').
+- **Feed — Últimas Ações**:
+  - Fundo `#F0F0F0`, lista vertical sem card/sombra, separada por divisores hairline 1px `#E5E5E3`.
+  - Mistura ordenada por `created_at DESC` de `demo_lote15_vistorias`, `demo_rdo_ocorrencias` e `demo_rdo_registros`.
+  - Padding 14px 20px, background `#FFFFFF`, active state `#F7F7F7`.
+  - Linha 1: Tipo + Trecho (Inter 14px 500 `#111111`) à esquerda, Data "DD/MM" (Inter 13px 400 `#9B9B9B`) à direita.
+  - Linha 2: Detalhe secundário contextual (Endereço da vistoria `Rua ... N...`, Tipo/gravidade da ocorrência, Nome fictício do responsável + contagem de participantes para RDO).
+- **Bottom Sheet Modal**:
+  - Sobe da base cobrindo 85% da tela, border-radius 16px 16px 0 0, handle bar 40px × 4px `#E5E5E3`, backdrop com blur suave.
+  - Layout customizado por tipo:
+    - **Vistoria**: Título com trecho, endereço, lista flat de dados (CEP, Morador, Idosos, Crianças, Desocupado, Acesso, Observações) e grid de fotos 3 colunas (thumbnails 80px).
+    - **Incidente**: Título com trecho, gravidade/tipo, status, data, bloco de descrição detalhada e fotos.
+    - **RDO**: Título com trecho, data, status, turno, lista flat de participantes com funções e bloco de atividades.
+- **Bottom Navigation (Fixed)**:
+  - Altura 64px + safe-area-inset-bottom, background `#FFFFFF`, borda superior 1px `#E5E5E3`.
+  - 4 itens:
+    1. Vistoria (ícone Home, ativo `#111111`)
+    2. RDO (ícone ClipboardList -> `/rdo/novo`)
+    3. Incidente (ícone AlertTriangle -> `/ocorrencia`)
+    4. Buscar (ícone Search -> ativa campo de busca no topo filtrando o feed em tempo real)
+- **Rotas e Migrations**:
+  - Rota `/home` protegida no `middleware.ts`.
+  - `app/login/page.tsx` redirecionando para `/home`.
+  - `app/trechos/page.tsx` redirecionando para `/home`.
+  - Páginas ponte `/rdo/novo` e `/ocorrencia` criadas para navegação limpa.
+  - Seed no Supabase com vistorias, ocorrências e registros de demonstração.
+  - Arquivo de migração `supabase/migrations/20260910000000_add_rua_to_vistorias.sql`.
+
+
 

@@ -3,7 +3,10 @@ import { NextResponse, type NextRequest } from 'next/server';
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  const isProtected = pathname.startsWith('/trechos') || pathname.startsWith('/vistoria');
+  const isProtected =
+    pathname.startsWith('/trechos') ||
+    pathname.startsWith('/vistoria') ||
+    pathname.startsWith('/home');
 
   if (isProtected) {
     const sessionCookie = request.cookies.get('ml_vistoria_session');
@@ -17,5 +20,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/trechos/:path*', '/vistoria/:path*'],
+  matcher: ['/trechos/:path*', '/vistoria/:path*', '/home/:path*'],
 };
