@@ -141,3 +141,5 @@ Reestruturar completamente o layout e a arquitetura de interface do PWA `jfsf-de
   - Persistência no `localStorage` sob a chave `ml_vistoria_session` e redirecionamento para `/home`.
 - **Verificação & Build**:
   - `npm run build` executado com 0 erros de TypeScript e compilação estática de todas as rotas com sucesso.
+  - Eliminação da splash duplicada: `app/page.tsx` agora redireciona diretamente para `/login` (`redirect('/login')`), consolidando todo o fluxo de entrada e autenticação na tela única de `/login`.
+
