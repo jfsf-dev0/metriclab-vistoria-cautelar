@@ -5,8 +5,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { getSession, UserSession } from '@/lib/auth';
-import { ChevronRight } from 'lucide-react';
-import { HeaderMobile } from '@/components/layout/HeaderMobile';
+import { ChevronRight, ChevronDown } from 'lucide-react';
 
 interface Trecho {
   id: string;
@@ -23,8 +22,8 @@ export default function TrechosPage() {
   const [session, setSessionState] = useState<UserSession | null>(null);
   const [trechos, setTrechos] = useState<Trecho[]>([]);
   const [loading, setLoading] = useState(true);
+  const [openTrechoId, setOpenTrechoId] = useState<string | null>(null);
 
-  // Check auth
   useEffect(() => {
     const s = getSession();
     if (!s) {
@@ -34,7 +33,6 @@ export default function TrechosPage() {
     setSessionState(s);
   }, [router]);
 
-  // Load trechos liberados
   const loadTrechos = async () => {
     try {
       const { data, error } = await supabase
@@ -71,83 +69,102 @@ export default function TrechosPage() {
     };
   }, []);
 
-  const handleSelectTrecho = (trechoId: string) => {
+  const toggleAccordion = (id: string) => {
+    setOpenTrechoId((prev) => (prev === id ? null : id));
+  };
+
+  const handleIniciarVistoria = (trechoId: string) => {
     router.push(`/vistoria/novo?trecho_id=${trechoId}`);
   };
 
   return (
     <main className="min-h-screen bg-[#F7F7F5] text-[#111111] flex flex-col justify-between">
-      {/* Header: logo + "Trechos" + "Olá, [Nome]" */}
-      <HeaderMobile
-        title="Trechos"
-        showLogo={true}
-        rightAction={
-          <span className="text-[13px] font-normal text-[#9B9B9B]">
-            Olá, <span className="text-[#111111]">{session?.nome?.split(' ')[0] || 'Inspetor'}</span>
-          </span>
-        }
-      />
+      {/* Header (52px): Logo "m." | "Trechos" center | "Olá, [Nome]" */}
+      <header className="h-[52px] bg-[#F7F7F5] border-b border-[#E5E5E3] px-6 flex items-center justify-between">
+        <span className="text-[20px] font-bold text-[#111111] leading-none">
+          m<span className="text-[#F5A623]">.</span>
+        </span>
+        <span className="text-[16px] font-normal text-[#111111]">
+          Trechos
+        </span>
+        <span className="text-[13px] font-normal text-[#9B9B9B]">
+          Olá, {session?.nome?.split(' ')[0] || 'Inspetor'}
+        </span>
+      </header>
 
-      <div className="flex-1 max-w-md w-full mx-auto px-5 py-5">
-        {/* Eyebrow label */}
-        <div className="pt-2 pb-2">
-          <span className="text-[11px] font-medium uppercase tracking-[0.5px] text-[#9B9B9B]">
-            TRECHOS DISPONÍVEIS
-          </span>
-        </div>
+      {/* Conteúdo padding 24px */}
+      <div className="flex-1 max-w-md w-full mx-auto p-6">
+        {/* Eyebrow */}
+        <span className="text-[11px] font-medium uppercase tracking-[0.5px] text-[#9B9B9B] block mb-2">
+          TRECHOS DISPONÍVEIS
+        </span>
 
-        {/* Loading ou lista sem cards */}
+        {/* Lista accordion */}
         {loading ? (
           <div className="divide-y divide-[#E5E5E3]">
             <div className="py-4 animate-pulse">
-              <div className="h-4 bg-[#E5E5E3] w-3/4 rounded mb-2" />
-              <div className="h-3 bg-[#EFEFED] w-1/2 rounded" />
+              <div className="h-5 bg-[#E5E5E3] w-3/4 mb-2" />
             </div>
             <div className="py-4 animate-pulse">
-              <div className="h-4 bg-[#E5E5E3] w-2/3 rounded mb-2" />
-              <div className="h-3 bg-[#EFEFED] w-1/3 rounded" />
+              <div className="h-5 bg-[#E5E5E3] w-2/3 mb-2" />
             </div>
           </div>
         ) : trechos.length === 0 ? (
-          <div className="py-12 text-center">
-            <p className="text-[14px] text-[#6B6B6B]">
-              Nenhum trecho liberado no momento.
+          <div className="py-8">
+            <p className="text-[16px] font-normal leading-[1.5] text-[#6B6B6B]">
+              Nenhum trecho disponível.
             </p>
           </div>
         ) : (
-          <div className="divide-y divide-[#E5E5E3]">
-            {trechos.map((trecho) => (
-              <div
-                key={trecho.id}
-                onClick={() => handleSelectTrecho(trecho.id)}
-                className="py-4 flex items-center justify-between gap-4 cursor-pointer transition-colors hover:bg-[#EFEFED] -mx-5 px-5"
-              >
-                <div className="flex-1 min-w-0">
-                  <div className="text-[15px] font-medium text-[#111111] leading-snug truncate">
-                    {trecho.nome}
-                  </div>
-                  <div className="text-[13px] text-[#9B9B9B] mt-0.5 flex items-center gap-2">
-                    <span>
-                      Km {trecho.km_inicio} → {trecho.km_fim}
+          <div>
+            {trechos.map((trecho) => {
+              const isOpen = openTrechoId === trecho.id;
+              return (
+                <div key={trecho.id} className="border-b border-[#E5E5E3]">
+                  {/* Cabeçalho do item */}
+                  <div
+                    onClick={() => toggleAccordion(trecho.id)}
+                    className="py-4 flex items-center justify-between cursor-pointer select-none transition-colors"
+                  >
+                    <span className="text-[20px] font-normal leading-none text-[#111111]">
+                      {trecho.nome}
                     </span>
-                    {trecho.etapa_planejamento && (
-                      <>
-                        <span>·</span>
-                        <span>{trecho.etapa_planejamento}</span>
-                      </>
+                    {isOpen ? (
+                      <ChevronDown className="w-5 h-5 text-[#C4C4C2]" />
+                    ) : (
+                      <ChevronRight className="w-5 h-5 text-[#C4C4C2]" />
                     )}
                   </div>
-                </div>
 
-                <ChevronRight className="w-4 h-4 text-[#C4C4C2] shrink-0" />
-              </div>
-            ))}
+                  {/* Conteúdo expandido inline */}
+                  {isOpen && (
+                    <div className="bg-white p-4 mb-4 rounded-none">
+                      <p className="text-[16px] font-normal leading-[1.5] text-[#6B6B6B]">
+                        Km {trecho.km_inicio} → {trecho.km_fim}
+                      </p>
+                      {trecho.etapa_planejamento && (
+                        <p className="text-[13px] font-normal text-[#9B9B9B] mt-1">
+                          {trecho.etapa_planejamento}
+                        </p>
+                      )}
+                      <div className="h-4" />
+                      <button
+                        onClick={() => handleIniciarVistoria(trecho.id)}
+                        className="w-full h-12 bg-[#111111] hover:bg-black text-white text-[14px] font-medium rounded-[6px] transition-colors flex items-center justify-center cursor-pointer"
+                      >
+                        Iniciar Vistoria
+                      </button>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
 
-      <footer className="w-full text-center py-4 text-[11px] text-[#9B9B9B] border-t border-[#E5E5E3] bg-[#F7F7F5] pb-safe">
-        MetricLab · Consórcio Pacote 15 e 19
+      <footer className="w-full text-center py-4 text-[11px] text-[#9B9B9B] border-t border-[#E5E5E3]">
+        MetricLab · Pacote 15 e 19
       </footer>
     </main>
   );

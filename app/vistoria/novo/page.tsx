@@ -5,17 +5,15 @@ import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { getSession, UserSession } from '@/lib/auth';
-import { Camera, X, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Camera, ChevronRight, ChevronDown, Loader2 } from 'lucide-react';
 
-const CHECKLIST_PERGUNTAS = [
-  'Imóvel está desocupado?',
+const CHECKLIST_6 = [
+  'Imóvel desocupado?',
   'Apresenta danos estruturais visíveis?',
-  'Acesso ao imóvel está desobstruído?',
-  'Medidor de energia presente e acessível?',
-  'Rede de água acessível e identificada?',
-  'Há riscos de segurança identificados?',
+  'Acesso ao imóvel desobstruído?',
+  'Medidor de energia presente?',
+  'Rede de água identificada?',
+  'Riscos de segurança identificados?',
 ];
 
 function VistoriaFormContent() {
@@ -27,16 +25,22 @@ function VistoriaFormContent() {
   const [trecho, setTrecho] = useState<any>(null);
   const [loadingTrecho, setLoadingTrecho] = useState(true);
 
-  // Step state (1 to 4)
+  // Step 1 to 4
   const [passo, setPasso] = useState<1 | 2 | 3 | 4>(1);
 
-  // Passo 1: Residência
-  const [numeroResidencia, setNumeroResidencia] = useState('');
+  // Passo 1: Identificação do Imóvel
+  const [numeroLote, setNumeroLote] = useState('');
   const [complemento, setComplemento] = useState('');
-  const [observacaoInicial, setObservacaoInicial] = useState('');
+  const [nomeMorador, setNomeMorador] = useState('');
+  const [temIdosos, setTemIdosos] = useState<boolean | null>(null);
+  const [temCriancas, setTemCriancas] = useState<boolean | null>(null);
+  const [imovelDesocupado, setImovelDesocupado] = useState<boolean | null>(null);
+  const [acessoDisponivel, setAcessoDisponivel] = useState<boolean | null>(null);
+  const [observacoesIniciais, setObservacoesIniciais] = useState('');
 
-  // Passo 2: Checklist (6 itens)
-  const [respostas, setRespostas] = useState<Record<number, boolean>>({});
+  // Passo 2: Checklist 6 itens
+  const [checklistRespostas, setChecklistRespostas] = useState<Record<number, boolean>>({});
+  const [openChecklistIdx, setOpenChecklistIdx] = useState<number | null>(null);
 
   // Passo 3: Fotos
   const [fotos, setFotos] = useState<string[]>([]);
@@ -54,7 +58,7 @@ function VistoriaFormContent() {
   const [submitting, setSubmitting] = useState(false);
   const [erroGeral, setErroGeral] = useState<string | null>(null);
 
-  // Auth check & Trecho fetch
+  // Auth & Trecho check
   useEffect(() => {
     const s = getSession();
     if (!s) {
@@ -89,7 +93,7 @@ function VistoriaFormContent() {
     loadTrechoData();
   }, [router, trechoId]);
 
-  // Canvas Setup
+  // Canvas setup
   useEffect(() => {
     if (passo === 4 && canvasRef.current) {
       const canvas = canvasRef.current;
@@ -99,9 +103,7 @@ function VistoriaFormContent() {
         canvas.width = rect.width * 2;
         canvas.height = rect.height * 2;
         ctx.scale(2, 2);
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, rect.width, rect.height);
-        ctx.strokeStyle = '#111111';
+        ctx.strokeStyle = '#1e3a5f';
         ctx.lineWidth = 2;
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
@@ -109,34 +111,30 @@ function VistoriaFormContent() {
     }
   }, [passo]);
 
-  const getCanvasCoords = (e: React.TouchEvent | React.MouseEvent) => {
-    if (!canvasRef.current) return { x: 0, y: 0 };
-    const rect = canvasRef.current.getBoundingClientRect();
-    const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
-    const clientY = 'touches' in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
-    return {
-      x: clientX - rect.left,
-      y: clientY - rect.top,
-    };
-  };
-
-  const startDrawing = (e: React.TouchEvent | React.MouseEvent) => {
-    if (!canvasRef.current) return;
-    const ctx = canvasRef.current.getContext('2d');
-    if (!ctx) return;
-    const { x, y } = getCanvasCoords(e);
-    ctx.beginPath();
-    ctx.moveTo(x, y);
+  const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     setIsDrawing(true);
     setHasSignature(true);
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    const rect = canvas.getBoundingClientRect();
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    ctx.beginPath();
+    ctx.moveTo(clientX - rect.left, clientY - rect.top);
   };
 
-  const draw = (e: React.TouchEvent | React.MouseEvent) => {
-    if (!isDrawing || !canvasRef.current) return;
-    const ctx = canvasRef.current.getContext('2d');
+  const draw = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+    if (!isDrawing) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    const { x, y } = getCanvasCoords(e);
-    ctx.lineTo(x, y);
+    const rect = canvas.getBoundingClientRect();
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    ctx.lineTo(clientX - rect.left, clientY - rect.top);
     ctx.stroke();
   };
 
@@ -145,82 +143,84 @@ function VistoriaFormContent() {
   };
 
   const clearCanvas = () => {
-    if (!canvasRef.current) return;
-    const ctx = canvasRef.current.getContext('2d');
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    const rect = canvasRef.current.getBoundingClientRect();
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, rect.width, rect.height);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     setHasSignature(false);
   };
 
-  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setUploadingFoto(true);
-    try {
-      const ext = file.name.split('.').pop() || 'jpg';
-      const path = `vistorias/temp-${Date.now()}/${Date.now()}.${ext}`;
-
-      const { error } = await supabase.storage
-        .from('demo-lote15-fotos')
-        .upload(path, file, { cacheControl: '3600', upsert: true });
-
-      if (error) throw error;
-
-      const { data: urlData } = supabase.storage
-        .from('demo-lote15-fotos')
-        .getPublicUrl(path);
-
-      if (urlData?.publicUrl) {
-        setFotos((prev) => [...prev, urlData.publicUrl]);
-      }
-    } catch (err: any) {
-      console.error('Erro no upload de foto:', err);
-      setErroGeral('Falha ao enviar foto: ' + (err.message || 'Erro de rede'));
-    } finally {
-      setUploadingFoto(false);
-      if (fileInputRef.current) fileInputRef.current.value = '';
-    }
-  };
-
-  const handleRemoveFoto = (urlToRemove: string) => {
-    setFotos((prev) => prev.filter((u) => u !== urlToRemove));
-  };
-
-  const handleCaptureGeo = () => {
+  const handleCaptureGPS = () => {
     if (!navigator.geolocation) {
-      setErroGeral('Geolocalização não suportada no seu dispositivo.');
+      setGeoLoc({ lat: -23.5489, lng: -46.6388 });
       return;
     }
     setCapturingGeo(true);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setGeoLoc({
-          lat: Number(pos.coords.latitude.toFixed(6)),
-          lng: Number(pos.coords.longitude.toFixed(6)),
+          lat: Number(pos.coords.latitude.toFixed(4)),
+          lng: Number(pos.coords.longitude.toFixed(4)),
         });
         setCapturingGeo(false);
       },
-      (err) => {
-        console.error('Erro GPS:', err);
-        setGeoLoc({ lat: -23.55052, lng: -46.633308 });
+      () => {
+        setGeoLoc({ lat: -23.5489, lng: -46.6388 });
         setCapturingGeo(false);
       },
-      { enableHighAccuracy: true, timeout: 10000 }
+      { timeout: 8000 }
     );
   };
 
-  const canAdvancePasso1 = numeroResidencia.trim().length > 0;
-  const canAdvancePasso2 =
-    CHECKLIST_PERGUNTAS.length > 0 &&
-    CHECKLIST_PERGUNTAS.every((_, idx) => respostas[idx] !== undefined);
-  const canAdvancePasso3 = fotos.length >= 1;
-  const canSubmitPasso4 = hasSignature && geoLoc !== null;
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
 
+    setUploadingFoto(true);
+    try {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const filePath = `vistorias/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('demo-lote15-fotos')
+          .upload(filePath, file, { contentType: file.type });
+
+        if (uploadError) {
+          const reader = new FileReader();
+          reader.onload = (re) => {
+            if (re.target?.result) {
+              setFotos((prev) => [...prev, re.target!.result as string]);
+            }
+          };
+          reader.readAsDataURL(file);
+        } else {
+          const { data } = supabase.storage
+            .from('demo-lote15-fotos')
+            .getPublicUrl(filePath);
+          setFotos((prev) => [...prev, data.publicUrl]);
+        }
+      }
+    } finally {
+      setUploadingFoto(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handleRemoveFoto = (index: number) => {
+    setFotos((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // Submission
   const handleSubmitVistoria = async () => {
-    if (!canSubmitPasso4 || submitting) return;
+    if (!hasSignature || !geoLoc) {
+      setErroGeral('Assinatura e localização são obrigatórias.');
+      return;
+    }
+
     setSubmitting(true);
     setErroGeral(null);
 
@@ -230,24 +230,25 @@ function VistoriaFormContent() {
         const dataUrl = canvasRef.current.toDataURL('image/png');
         const res = await fetch(dataUrl);
         const blob = await res.blob();
-        const path = `vistorias/assinaturas/ass-${Date.now()}.png`;
-
-        const { error: errAss } = await supabase.storage
+        const path = `assinaturas/sig_${Date.now()}.png`;
+        const { error: upErr } = await supabase.storage
           .from('demo-lote15-fotos')
-          .upload(path, blob, { contentType: 'image/png', upsert: true });
+          .upload(path, blob, { contentType: 'image/png' });
 
-        if (!errAss) {
+        if (!upErr) {
           const { data: assData } = supabase.storage
             .from('demo-lote15-fotos')
             .getPublicUrl(path);
           assinaturaUrl = assData?.publicUrl || '';
+        } else {
+          assinaturaUrl = dataUrl;
         }
       }
 
-      const checklistPayload = CHECKLIST_PERGUNTAS.map((pergunta, idx) => ({
+      const checklistPayload = CHECKLIST_6.map((pergunta, idx) => ({
         item: pergunta,
-        resposta: respostas[idx] ? 'Sim' : 'Não',
-        conforme: respostas[idx],
+        resposta: checklistRespostas[idx] ? 'Sim' : 'Não',
+        conforme: checklistRespostas[idx],
       }));
 
       const { data: newVistoria, error: errVistoria } = await supabase
@@ -259,13 +260,19 @@ function VistoriaFormContent() {
           status: 'concluida',
           checklist: checklistPayload,
           fotos: fotos,
-          observacoes: observacaoInicial.trim() || null,
+          observacoes: observacoesIniciais.trim() || null,
           ia_aprovado: null,
           geolat: geoLoc?.lat,
           geolng: geoLoc?.lng,
           assinatura_url: assinaturaUrl || null,
-          numero_residencia: numeroResidencia.trim(),
+          numero_lote: numeroLote.trim(),
+          numero_residencia: numeroLote.trim(),
           complemento: complemento.trim() || null,
+          nome_morador: nomeMorador.trim() || null,
+          tem_idosos: temIdosos,
+          tem_criancas: temCriancas,
+          imovel_desocupado: imovelDesocupado,
+          acesso_disponivel: acessoDisponivel,
         })
         .select()
         .single();
@@ -276,31 +283,16 @@ function VistoriaFormContent() {
 
       const vistoriaId = newVistoria.id;
 
-      await supabase.rpc('demo_lote15_criar_checklist', { p_vistoria_id: vistoriaId });
-
-      await supabase
-        .from('demo_lote15_trechos')
-        .update({ status: 'vistoria_iniciada', updated_at: new Date().toISOString() })
-        .eq('id', trecho.id);
-
-      await supabase.from('demo_lote15_notificacoes').insert({
-        tipo: 'vistoria_concluida',
-        destinatario: session?.telefone || '5511999990001',
-        canal: 'whatsapp',
-        status: 'pendente',
-        payload: {
-          vistoria_id: vistoriaId,
-          trecho_id: trecho.id,
-          responsavel: session?.nome,
-        },
-      });
-
-      const n8nWebhookUrl =
-        process.env.N8N_WEBHOOK_URL ||
-        'https://n8n.metriclab.com.br/webhook/vistoria-concluida';
-
       try {
-        fetch(n8nWebhookUrl, {
+        await supabase
+          .from('demo_lote15_trechos')
+          .update({ status: 'vistoria_iniciada', updated_at: new Date().toISOString() })
+          .eq('id', trecho.id);
+      } catch (_) {}
+
+      // Trigger webhook
+      try {
+        fetch('https://n8n.metriclab.com.br/webhook/vistoria-concluida', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -311,278 +303,453 @@ function VistoriaFormContent() {
             superior_telefone: trecho.superior_telefone || '5511999990010',
           }),
         });
-      } catch (webhookErr) {
-        console.warn('Erro ao disparar webhook N8N:', webhookErr);
-      }
+      } catch (_) {}
 
       router.push(`/vistoria/${vistoriaId}/status`);
     } catch (err: any) {
       console.error(err);
-      setErroGeral(err.message || 'Erro ao submeter vistoria.');
+      setErroGeral(err.message || 'Erro ao enviar vistoria.');
       setSubmitting(false);
     }
   };
 
-  const handleVoltar = () => {
-    if (passo === 1) {
-      router.push('/trechos');
-    } else {
-      setPasso((prev) => (prev - 1) as any);
-    }
-  };
-
-  const progressPercentage = (passo / 4) * 100;
-
   if (loadingTrecho) {
     return (
-      <main className="min-h-screen bg-[#F7F7F5] flex items-center justify-center text-[#9B9B9B] text-[13px]">
-        Carregando...
-      </main>
+      <div className="min-h-screen bg-[#F7F7F5] flex items-center justify-center">
+        <Loader2 className="w-5 h-5 animate-spin text-[#9B9B9B]" />
+      </div>
     );
   }
 
+  const trechoNomeCurto = trecho?.nome?.split('—')[0]?.trim() || 'Trecho';
+
   return (
     <main className="min-h-screen bg-[#F7F7F5] text-[#111111] flex flex-col justify-between">
-      {/* Header */}
-      <header className="sticky top-0 z-30 h-[52px] w-full bg-[#F7F7F5] border-b border-[#E5E5E3] px-5 flex items-center justify-between select-none">
+      {/* Header: "← Voltar" | "[Trecho]" center | "[passo] de 5" */}
+      <header className="h-[52px] bg-[#F7F7F5] border-b border-[#E5E5E3] px-6 flex items-center justify-between">
         <button
-          onClick={handleVoltar}
-          className="text-[14px] font-normal text-[#111111] hover:text-black cursor-pointer bg-transparent border-none p-0"
+          onClick={() => {
+            if (passo > 1) setPasso((prev) => (prev - 1) as any);
+            else router.push('/trechos');
+          }}
+          className="text-[14px] text-[#111111] hover:underline"
         >
           ← Voltar
         </button>
-
-        <div className="text-[14px] font-medium text-[#111111] truncate px-2 max-w-[200px]">
-          {trecho?.nome || 'Vistoria'}
-        </div>
-
-        <div className="text-[13px] font-normal text-[#9B9B9B]">
-          {passo} de 4
-        </div>
+        <span className="text-[16px] font-normal text-[#111111]">
+          {trechoNomeCurto}
+        </span>
+        <span className="text-[13px] font-normal text-[#9B9B9B]">
+          {passo} de 5
+        </span>
       </header>
 
-      {/* Barra de progresso: 2px hairline-soft -> fill ink */}
-      <div className="w-full bg-[#EFEFED] h-[2px]">
+      {/* Barra progresso: height 2px, background hairline-soft, fill ink */}
+      <div className="w-full h-[2px] bg-[#EFEFED]">
         <div
-          className="bg-[#111111] h-[2px] transition-all duration-300"
-          style={{ width: `${progressPercentage}%` }}
+          className="h-full bg-[#111111] transition-all duration-500 rounded-none"
+          style={{ width: `${(passo / 5) * 100}%` }}
         />
       </div>
 
-      <div className="flex-1 max-w-md w-full mx-auto px-5 py-6">
+      {/* Conteúdo com padding 24px */}
+      <div className="flex-1 max-w-md w-full mx-auto p-6">
         {erroGeral && (
-          <div className="mb-4 text-[13px] text-[#111111] bg-[#EFEFED] p-3 border border-[#E5E5E3]">
+          <div className="mb-6 text-[13px] text-[#111111] border-b border-[#111111] pb-2">
             {erroGeral}
           </div>
         )}
 
-        {/* PASSO 1: DADOS DA RESIDÊNCIA */}
+        {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            PASSO 1 — IDENTIFICAÇÃO DO IMÓVEL
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         {passo === 1 && (
           <div>
-            <span className="text-[11px] font-medium uppercase tracking-[0.5px] text-[#9B9B9B]">
-              DADOS DA RESIDÊNCIA
+            <span className="text-[11px] font-medium uppercase tracking-[0.5px] text-[#9B9B9B] block mb-8">
+              IDENTIFICAÇÃO DO IMÓVEL
             </span>
-            <div className="h-6" />
 
-            <div className="space-y-6">
-              <Input
-                label="NÚMERO"
+            {/* Label NÚMERO / LOTE + Input underline */}
+            <div className="mb-6 flex flex-col">
+              <label className="text-[11px] font-medium uppercase tracking-[0.5px] text-[#9B9B9B] mb-[6px]">
+                NÚMERO / LOTE *
+              </label>
+              <input
                 type="text"
                 required
-                value={numeroResidencia}
-                onChange={(e) => setNumeroResidencia(e.target.value)}
-                placeholder="Ex: 142"
+                value={numeroLote}
+                onChange={(e) => setNumeroLote(e.target.value)}
+                placeholder="Ex: 54, 54B, Lote 12A"
+                className="w-full bg-transparent border-0 border-b border-[#E5E5E3] focus:border-[#111111] py-3 text-[16px] text-[#111111] placeholder:text-[#9B9B9B] outline-none rounded-none transition-colors"
               />
+            </div>
 
-              <Input
-                label="COMPLEMENTO"
+            {/* Label COMPLEMENTO */}
+            <div className="mb-6 flex flex-col">
+              <label className="text-[11px] font-medium uppercase tracking-[0.5px] text-[#9B9B9B] mb-[6px]">
+                COMPLEMENTO
+              </label>
+              <input
                 type="text"
                 value={complemento}
                 onChange={(e) => setComplemento(e.target.value)}
-                placeholder="Ex: Casa dos fundos, Bloco B"
+                placeholder="Casa fundos, Apto 3, Fundos..."
+                className="w-full bg-transparent border-0 border-b border-[#E5E5E3] focus:border-[#111111] py-3 text-[16px] text-[#111111] placeholder:text-[#9B9B9B] outline-none rounded-none transition-colors"
               />
+            </div>
 
-              <div className="w-full text-left">
-                <label className="block text-[11px] font-medium text-[#9B9B9B] uppercase tracking-[0.5px] mb-2">
-                  OBSERVAÇÕES
-                </label>
-                <textarea
-                  rows={3}
-                  value={observacaoInicial}
-                  onChange={(e) => setObservacaoInicial(e.target.value)}
-                  placeholder="Observações prévias do imóvel..."
-                  className="w-full bg-transparent border-t-0 border-l-0 border-r-0 border-b border-[#E5E5E3] rounded-none py-2 text-[15px] text-[#111111] placeholder:text-[#9B9B9B] focus:outline-none focus:border-b-[#111111] resize-none"
-                />
+            {/* Label NOME DO MORADOR */}
+            <div className="mb-8 flex flex-col">
+              <label className="text-[11px] font-medium uppercase tracking-[0.5px] text-[#9B9B9B] mb-[6px]">
+                NOME DO MORADOR
+              </label>
+              <input
+                type="text"
+                value={nomeMorador}
+                onChange={(e) => setNomeMorador(e.target.value)}
+                placeholder="Nome completo"
+                className="w-full bg-transparent border-0 border-b border-[#E5E5E3] focus:border-[#111111] py-3 text-[16px] text-[#111111] placeholder:text-[#9B9B9B] outline-none rounded-none transition-colors"
+              />
+            </div>
+
+            <div className="w-full border-b border-[#E5E5E3] my-8" />
+
+            <span className="text-[11px] font-medium uppercase tracking-[0.5px] text-[#9B9B9B] block mb-4">
+              PERFIL DOS MORADORES
+            </span>
+
+            {/* Pergunta 1: Idosos */}
+            <div className="border-b border-[#E5E5E3] py-4 flex items-center justify-between">
+              <span className="text-[20px] font-normal leading-none text-[#111111]">
+                Há idosos no imóvel? (60+)
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setTemIdosos(true)}
+                  className={`px-4 py-1.5 text-[14px] font-normal rounded-[4px] border transition-colors ${
+                    temIdosos === true
+                      ? 'bg-[#111111] text-white border-[#111111]'
+                      : 'border-[#E5E5E3] text-[#111111]'
+                  }`}
+                >
+                  Sim
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTemIdosos(false)}
+                  className={`px-4 py-1.5 text-[14px] font-normal rounded-[4px] border transition-colors ${
+                    temIdosos === false
+                      ? 'bg-[#111111] text-white border-[#111111]'
+                      : 'border-[#E5E5E3] text-[#111111]'
+                  }`}
+                >
+                  Não
+                </button>
               </div>
             </div>
 
-            <div className="h-10" />
+            {/* Pergunta 2: Crianças */}
+            <div className="border-b border-[#E5E5E3] py-4 flex items-center justify-between">
+              <span className="text-[20px] font-normal leading-none text-[#111111]">
+                Há crianças no imóvel? (0-12)
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setTemCriancas(true)}
+                  className={`px-4 py-1.5 text-[14px] font-normal rounded-[4px] border transition-colors ${
+                    temCriancas === true
+                      ? 'bg-[#111111] text-white border-[#111111]'
+                      : 'border-[#E5E5E3] text-[#111111]'
+                  }`}
+                >
+                  Sim
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTemCriancas(false)}
+                  className={`px-4 py-1.5 text-[14px] font-normal rounded-[4px] border transition-colors ${
+                    temCriancas === false
+                      ? 'bg-[#111111] text-white border-[#111111]'
+                      : 'border-[#E5E5E3] text-[#111111]'
+                  }`}
+                >
+                  Não
+                </button>
+              </div>
+            </div>
 
-            <Button
-              onClick={() => setPasso(2)}
-              disabled={!canAdvancePasso1}
-              className="w-full bg-[#111111] text-white text-[14px] font-medium rounded-[6px] h-[48px]"
+            {/* Pergunta 3: Desocupado */}
+            <div className="border-b border-[#E5E5E3] py-4 flex items-center justify-between">
+              <span className="text-[20px] font-normal leading-none text-[#111111]">
+                Imóvel desocupado?
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setImovelDesocupado(true)}
+                  className={`px-4 py-1.5 text-[14px] font-normal rounded-[4px] border transition-colors ${
+                    imovelDesocupado === true
+                      ? 'bg-[#111111] text-white border-[#111111]'
+                      : 'border-[#E5E5E3] text-[#111111]'
+                  }`}
+                >
+                  Sim
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setImovelDesocupado(false)}
+                  className={`px-4 py-1.5 text-[14px] font-normal rounded-[4px] border transition-colors ${
+                    imovelDesocupado === false
+                      ? 'bg-[#111111] text-white border-[#111111]'
+                      : 'border-[#E5E5E3] text-[#111111]'
+                  }`}
+                >
+                  Não
+                </button>
+              </div>
+            </div>
+
+            {/* Pergunta 4: Acesso */}
+            <div className="border-b border-[#E5E5E3] py-4 flex items-center justify-between">
+              <span className="text-[20px] font-normal leading-none text-[#111111]">
+                Acesso disponível?
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setAcessoDisponivel(true)}
+                  className={`px-4 py-1.5 text-[14px] font-normal rounded-[4px] border transition-colors ${
+                    acessoDisponivel === true
+                      ? 'bg-[#111111] text-white border-[#111111]'
+                      : 'border-[#E5E5E3] text-[#111111]'
+                  }`}
+                >
+                  Sim
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAcessoDisponivel(false)}
+                  className={`px-4 py-1.5 text-[14px] font-normal rounded-[4px] border transition-colors ${
+                    acessoDisponivel === false
+                      ? 'bg-[#111111] text-white border-[#111111]'
+                      : 'border-[#E5E5E3] text-[#111111]'
+                  }`}
+                >
+                  Não
+                </button>
+              </div>
+            </div>
+
+            {/* Observações Iniciais */}
+            <div className="mt-8 mb-10 flex flex-col">
+              <label className="text-[11px] font-medium uppercase tracking-[0.5px] text-[#9B9B9B] mb-[6px]">
+                OBSERVAÇÕES INICIAIS
+              </label>
+              <textarea
+                rows={4}
+                value={observacoesIniciais}
+                onChange={(e) => setObservacoesIniciais(e.target.value)}
+                placeholder="Estado aparente da fachada, vizinhança, acesso, condições gerais..."
+                className="w-full bg-transparent border-0 border-b border-[#E5E5E3] focus:border-[#111111] py-3 text-[16px] text-[#111111] placeholder:text-[#9B9B9B] outline-none rounded-none resize-none transition-colors"
+              />
+            </div>
+
+            <button
+              onClick={() => {
+                if (!numeroLote.trim()) {
+                  setErroGeral('Informe o número ou lote do imóvel.');
+                  return;
+                }
+                setErroGeral(null);
+                setPasso(2);
+              }}
+              className="w-full h-12 bg-[#111111] hover:bg-black text-white text-[14px] font-medium rounded-[6px] transition-colors flex items-center justify-center cursor-pointer"
             >
               Próximo
-            </Button>
+            </button>
           </div>
         )}
 
-        {/* PASSO 2: CHECKLIST */}
+        {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            PASSO 2 — CHECKLIST
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         {passo === 2 && (
           <div>
-            <span className="text-[11px] font-medium uppercase tracking-[0.5px] text-[#9B9B9B]">
-              CHECKLIST
+            <span className="text-[11px] font-medium uppercase tracking-[0.5px] text-[#9B9B9B] block mb-2">
+              CHECKLIST DE VISTORIA
             </span>
-            <div className="h-4" />
+            <p className="text-[13px] font-normal text-[#9B9B9B] mb-6">
+              Responda todos os itens obrigatórios.
+            </p>
 
-            <div className="divide-y divide-[#E5E5E3]">
-              {CHECKLIST_PERGUNTAS.map((pergunta, idx) => {
-                const answer = respostas[idx];
+            <div className="divide-y divide-[#E5E5E3] border-t border-[#E5E5E3] mb-10">
+              {CHECKLIST_6.map((pergunta, idx) => {
+                const resp = checklistRespostas[idx];
+                const isOpen = openChecklistIdx === idx;
+                const statusTexto = resp === undefined ? '—' : resp ? 'Sim' : 'Não';
+                const statusCor = resp === undefined ? 'text-[#C4C4C2]' : 'text-[#6B6B6B]';
+
                 return (
-                  <div
-                    key={idx}
-                    className="py-4 flex items-center justify-between gap-4"
-                  >
-                    <span className="text-[15px] text-[#111111] leading-snug flex-1">
-                      {pergunta}
-                    </span>
-
-                    <div className="flex items-center gap-2 shrink-0">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setRespostas((prev) => ({ ...prev, [idx]: true }))
-                        }
-                        className={`h-[32px] w-[48px] rounded-[4px] border text-[13px] font-medium transition-colors cursor-pointer ${
-                          answer === true
-                            ? 'bg-[#111111] border-[#111111] text-white'
-                            : 'bg-transparent border-[#E5E5E3] text-[#111111]'
-                        }`}
-                      >
-                        Sim
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setRespostas((prev) => ({ ...prev, [idx]: false }))
-                        }
-                        className={`h-[32px] w-[48px] rounded-[4px] border text-[13px] font-medium transition-colors cursor-pointer ${
-                          answer === false
-                            ? 'bg-[#111111] border-[#111111] text-white'
-                            : 'bg-transparent border-[#E5E5E3] text-[#111111]'
-                        }`}
-                      >
-                        Não
-                      </button>
+                  <div key={idx} className="border-b border-[#E5E5E3]">
+                    <div
+                      onClick={() => setOpenChecklistIdx(isOpen ? null : idx)}
+                      className="py-4 flex items-center justify-between cursor-pointer select-none"
+                    >
+                      <span className="text-[20px] font-normal leading-none text-[#111111]">
+                        {pergunta}
+                      </span>
+                      <span className={`text-[14px] ${statusCor}`}>
+                        {statusTexto}
+                      </span>
                     </div>
+
+                    {isOpen && (
+                      <div className="bg-white p-4 mb-4 flex gap-3">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setChecklistRespostas((prev) => ({ ...prev, [idx]: true }));
+                            setOpenChecklistIdx(null);
+                          }}
+                          className={`flex-1 py-2 text-[14px] font-medium rounded-[4px] border transition-colors ${
+                            resp === true
+                              ? 'bg-[#111111] text-white border-[#111111]'
+                              : 'border-[#E5E5E3] text-[#111111]'
+                          }`}
+                        >
+                          Sim
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setChecklistRespostas((prev) => ({ ...prev, [idx]: false }));
+                            setOpenChecklistIdx(null);
+                          }}
+                          className={`flex-1 py-2 text-[14px] font-medium rounded-[4px] border transition-colors ${
+                            resp === false
+                              ? 'bg-[#111111] text-white border-[#111111]'
+                              : 'border-[#E5E5E3] text-[#111111]'
+                          }`}
+                        >
+                          Não
+                        </button>
+                      </div>
+                    )}
                   </div>
                 );
               })}
             </div>
 
-            <div className="h-8" />
-
-            <Button
+            <button
+              disabled={Object.keys(checklistRespostas).length < CHECKLIST_6.length}
               onClick={() => setPasso(3)}
-              disabled={!canAdvancePasso2}
-              className="w-full bg-[#111111] text-white text-[14px] font-medium rounded-[6px] h-[48px]"
+              className="w-full h-12 bg-[#111111] hover:bg-black disabled:opacity-40 text-white text-[14px] font-medium rounded-[6px] transition-colors flex items-center justify-center cursor-pointer"
             >
               Próximo
-            </Button>
+            </button>
           </div>
         )}
 
-        {/* PASSO 3: FOTOS */}
+        {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            PASSO 3 — FOTOS
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         {passo === 3 && (
           <div>
-            <span className="text-[11px] font-medium uppercase tracking-[0.5px] text-[#9B9B9B]">
-              FOTOS
+            <span className="text-[11px] font-medium uppercase tracking-[0.5px] text-[#9B9B9B] block mb-2">
+              REGISTRO FOTOGRÁFICO
             </span>
-            <div className="h-4" />
-
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              capture="environment"
-              className="hidden"
-              onChange={handlePhotoUpload}
-            />
+            <p className="text-[16px] font-normal leading-[1.5] text-[#6B6B6B] mb-6">
+              Fotografe o imóvel e condições identificadas.
+            </p>
 
             {/* Área câmera */}
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              ref={fileInputRef}
+              onChange={handleFileUpload}
+              className="hidden"
+            />
+
             <div
               onClick={() => fileInputRef.current?.click()}
-              className="border border-dashed border-[#E5E5E3] rounded-[8px] p-8 bg-[#F7F7F5] flex flex-col items-center justify-center cursor-pointer hover:bg-[#EFEFED] transition-colors"
+              className="border border-dashed border-[#E5E5E3] rounded-none py-12 px-6 bg-[#F7F7F5] flex flex-col items-center justify-center cursor-pointer hover:border-[#111111] transition-colors mb-4"
             >
               {uploadingFoto ? (
                 <Loader2 className="w-5 h-5 text-[#9B9B9B] animate-spin mb-2" />
               ) : (
                 <Camera className="w-5 h-5 text-[#9B9B9B] mb-2" />
               )}
-              <span className="text-[13px] text-[#9B9B9B]">
-                {uploadingFoto ? 'Enviando foto...' : 'Adicionar foto'}
+              <span className="text-[14px] font-normal text-[#6B6B6B]">
+                {uploadingFoto ? 'Enviando...' : 'Adicionar foto'}
               </span>
             </div>
 
             {/* Grid 2 colunas fotos */}
             {fotos.length > 0 && (
-              <div className="grid grid-cols-2 gap-3 mt-4">
-                {fotos.map((url, i) => (
-                  <div key={i} className="relative aspect-square rounded-[4px] overflow-hidden border border-[#E5E5E3] bg-[#EFEFED]">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
+              <div className="grid grid-cols-2 gap-3 mb-10">
+                {fotos.map((foto, idx) => (
+                  <div
+                    key={idx}
+                    className="relative aspect-video bg-[#EFEFED] rounded-[4px] overflow-hidden group border border-[#E5E5E3]"
+                  >
                     <img
-                      src={url}
-                      alt={`Foto ${i + 1}`}
+                      src={foto}
+                      alt={`Foto ${idx + 1}`}
                       className="w-full h-full object-cover"
                     />
                     <button
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleRemoveFoto(url);
+                        handleRemoveFoto(idx);
                       }}
-                      className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-black/60 text-[#9B9B9B] hover:text-white flex items-center justify-center text-[12px]"
+                      className="absolute top-1 right-1 bg-black/60 text-[#9B9B9B] hover:text-white text-[12px] w-6 h-6 rounded-full flex items-center justify-center transition-colors"
                     >
-                      <X className="w-3.5 h-3.5" />
+                      ×
                     </button>
                   </div>
                 ))}
               </div>
             )}
 
-            <div className="h-8" />
+            <div className="h-6" />
 
-            <Button
+            <button
+              disabled={fotos.length === 0}
               onClick={() => setPasso(4)}
-              disabled={!canAdvancePasso3}
-              className="w-full bg-[#111111] text-white text-[14px] font-medium rounded-[6px] h-[48px]"
+              className="w-full h-12 bg-[#111111] hover:bg-black disabled:opacity-40 text-white text-[14px] font-medium rounded-[6px] transition-colors flex items-center justify-center cursor-pointer"
             >
               Próximo
-            </Button>
+            </button>
           </div>
         )}
 
-        {/* PASSO 4: ASSINATURA */}
+        {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            PASSO 4 — ASSINATURA E LOCALIZAÇÃO
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         {passo === 4 && (
           <div>
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between mb-3">
               <span className="text-[11px] font-medium uppercase tracking-[0.5px] text-[#9B9B9B]">
                 ASSINATURA
               </span>
-              <button
-                type="button"
-                onClick={clearCanvas}
-                className="text-[13px] text-[#9B9B9B] hover:text-[#111111] bg-transparent border-none p-0 cursor-pointer"
-              >
-                Limpar
-              </button>
+              {hasSignature && (
+                <button
+                  type="button"
+                  onClick={clearCanvas}
+                  className="text-[13px] text-[#9B9B9B] hover:text-[#111111]"
+                >
+                  Limpar
+                </button>
+              )}
             </div>
-            <div className="h-3" />
 
-            {/* Canvas: border 1px solid hairline, border-radius 0, bg white, sem sombra */}
-            <div className="w-full h-44 bg-white border border-[#E5E5E3] touch-none">
+            {/* Canvas */}
+            <div className="border border-[#E5E5E3] rounded-none bg-white h-[180px] w-full overflow-hidden relative mb-8">
               <canvas
                 ref={canvasRef}
                 onMouseDown={startDrawing}
@@ -592,54 +759,52 @@ function VistoriaFormContent() {
                 onTouchStart={startDrawing}
                 onTouchMove={draw}
                 onTouchEnd={stopDrawing}
-                className="w-full h-full block cursor-crosshair"
+                className="w-full h-full touch-none cursor-crosshair"
               />
+              {!hasSignature && (
+                <div className="absolute inset-0 pointer-events-none flex items-center justify-center text-[13px] text-[#C4C4C2]">
+                  Assine com o dedo ou mouse
+                </div>
+              )}
             </div>
 
-            <div className="h-6" />
+            <div className="w-full border-b border-[#E5E5E3] mb-8" />
 
-            {/* GPS */}
-            <div>
+            {/* LOCALIZAÇÃO */}
+            <div className="mb-10">
               <span className="text-[11px] font-medium uppercase tracking-[0.5px] text-[#9B9B9B] block mb-2">
                 LOCALIZAÇÃO
               </span>
-              <div className="flex items-center justify-between py-2 border-b border-[#E5E5E3]">
-                <span className="text-[13px] text-[#6B6B6B]">
-                  {geoLoc
-                    ? `${geoLoc.lat.toFixed(5)}, ${geoLoc.lng.toFixed(5)}`
-                    : 'GPS pendente'}
-                </span>
+
+              {geoLoc ? (
+                <p className="text-[13px] font-normal text-[#9B9B9B]">
+                  Lat: {geoLoc.lat} · Lng: {geoLoc.lng}
+                </p>
+              ) : (
                 <button
                   type="button"
-                  onClick={handleCaptureGeo}
+                  onClick={handleCaptureGPS}
                   disabled={capturingGeo}
-                  className="text-[13px] text-[#111111] underline cursor-pointer bg-transparent border-none p-0"
+                  className="text-[14px] text-[#111111] hover:underline"
                 >
-                  {capturingGeo
-                    ? 'Capturando...'
-                    : geoLoc
-                    ? 'Confirmada (atualizar)'
-                    : 'Capturar'}
+                  {capturingGeo ? 'Obtendo coordenadas...' : 'Capturar localização'}
                 </button>
-              </div>
+              )}
             </div>
 
-            <div className="h-10" />
-
-            <Button
+            <button
+              disabled={!hasSignature || !geoLoc || submitting}
               onClick={handleSubmitVistoria}
-              disabled={!canSubmitPasso4 || submitting}
-              loading={submitting}
-              className="w-full bg-[#111111] text-white text-[14px] font-medium rounded-[6px] h-[48px]"
+              className="w-full h-12 bg-[#111111] hover:bg-black disabled:opacity-40 text-white text-[14px] font-medium rounded-[6px] transition-colors flex items-center justify-center cursor-pointer"
             >
-              Enviar Vistoria
-            </Button>
+              {submitting ? 'Gravando vistoria...' : 'Enviar Vistoria'}
+            </button>
           </div>
         )}
       </div>
 
-      <footer className="w-full text-center py-4 text-[11px] text-[#9B9B9B] border-t border-[#E5E5E3] bg-[#F7F7F5] pb-safe">
-        MetricLab · Consórcio Pacote 15 e 19
+      <footer className="w-full text-center py-4 text-[11px] text-[#9B9B9B] border-t border-[#E5E5E3]">
+        MetricLab · Pacote 15 e 19
       </footer>
     </main>
   );
@@ -649,9 +814,9 @@ export default function VistoriaNovoPage() {
   return (
     <Suspense
       fallback={
-        <main className="min-h-screen bg-[#F7F7F5] flex items-center justify-center text-[#9B9B9B] text-[13px]">
-          Carregando...
-        </main>
+        <div className="min-h-screen bg-[#F7F7F5] flex items-center justify-center">
+          <Loader2 className="w-5 h-5 animate-spin text-[#9B9B9B]" />
+        </div>
       }
     >
       <VistoriaFormContent />

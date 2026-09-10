@@ -48,19 +48,22 @@ Reestruturar completamente o layout e a arquitetura de interface do PWA `jfsf-de
    - Lista flat sem cards com divisores hairline 1px
    - Linhas com nome do trecho, quilometragem e chevron sutil
 4. **Vistoria (`/vistoria/novo`)**:
-   - Header com botão texto "← Voltar", nome do trecho e contador "1 de 4"
-   - Barra de progresso de 2px
-   - Passo 1: Inputs underline para dados da residência
-   - Passo 2: Checklist flat com botões Sim/Não com estado ativo em preto
-   - Passo 3: Área de câmera dashed minimalista e grid de fotos
-   - Passo 4: Assinatura sobre canvas limpo e geolocalização em texto simples
+   - Header com botão texto "← Voltar", nome do trecho e contador "1 de 5"
+   - Barra de progresso de 2px preenchida em ink
+   - Passo 1 (Identificação do Imóvel): Inputs underline para NÚMERO / LOTE, COMPLEMENTO, NOME DO MORADOR, perguntas em lista flat com botões Sim/Não (Idosos, Crianças, Desocupado, Acesso) e OBSERVAÇÕES INICIAIS
+   - Passo 2 (Checklist de Vistoria): Lista accordion das 6 perguntas obrigatórias com estado inline expandido
+   - Passo 3 (Fotos): Área de câmera dashed minimalista e grid de fotos com remoção
+   - Passo 4 (Assinatura e Localização): Assinatura sobre canvas limpo (#1e3a5f, 2px) e geolocalização em texto simples
 5. **Status (`/vistoria/[id]/status`)**:
-   - Layout flat centralizado
-   - Estado Analisando, Aprovada (Score 94) e Reprovada (Score 61)
-   - Checklist dos quesitos e resumo em texto graphite
-   - Ações em botões preto e secundário flat
+   - Fundo canvas sem header e sem card
+   - Estado Analisando ("ANALISANDO" pulsando), Aprovada ("APROVADA", Display 94 de 100, resumo lista flat) e Reprovada ("REPROVADA", 61 de 100, itens críticos)
+   - Botões em preto 48px
 
 ---
 
+### Migration Supabase Executada
+- `ALTER TABLE demo_lote15_vistorias ADD COLUMN IF NOT EXISTS numero_lote, nome_morador, tem_idosos, tem_criancas, imovel_desocupado, acesso_disponivel;`
+
 ### Verificação
 - Build Next.js 14 executado com sucesso e 0 erros de compilação ou tipagem.
+
