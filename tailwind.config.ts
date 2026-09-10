@@ -9,8 +9,16 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: '#f9fafb',
-        accent: '#2563eb',
+        canvas: '#F7F7F5',
+        surface: '#FFFFFF',
+        hairline: '#E5E5E3',
+        'hairline-soft': '#EFEFED',
+        ink: '#111111',
+        'ink-soft': '#3A3A3A',
+        graphite: '#6B6B6B',
+        stone: '#9B9B9B',
+        ash: '#C4C4C2',
+        accent: '#F5A623',
       },
     },
   },

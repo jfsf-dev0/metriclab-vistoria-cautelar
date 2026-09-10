@@ -5,13 +5,9 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { setSession } from '@/lib/auth';
-import { Phone, Lock, ArrowRight } from 'lucide-react';
-import { MetricLabLogo } from '@/components/brand/MetricLabLogo';
-import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Toast } from '@/components/ui/toast';
-import { Badge } from '@/components/ui/badge';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -58,7 +54,6 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      // Busca em demo_lote15_leads WHERE telefone = input AND chave_acesso = input AND status != 'expirado'
       const { data, error } = await supabase
         .from('demo_lote15_leads')
         .select('id, nome, telefone, chave_acesso, status')
@@ -77,14 +72,12 @@ export default function LoginPage() {
         return;
       }
 
-      // Salva sessão
       setSession({
         lead_id: data.id,
         telefone: data.telefone,
         nome: data.nome,
       });
 
-      // Redireciona para /trechos
       router.push('/trechos');
     } catch (err: any) {
       console.error('Erro de login:', err);
@@ -94,87 +87,96 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 text-gray-900 flex flex-col justify-between p-4 sm:p-6 select-none relative pb-safe">
+    <main className="min-h-screen bg-[#F7F7F5] text-[#111111] flex flex-col justify-between p-6 select-none relative pb-safe">
       <div className="w-full max-w-sm mx-auto my-auto py-6">
-        {/* Logo MetricLab pequeno acima do card */}
-        <div className="flex justify-center mb-6">
-          <MetricLabLogo size="md" showText={true} />
+        {/* Logo "m." topo centralizado */}
+        <div className="flex justify-center">
+          <span
+            style={{
+              fontSize: '32px',
+              fontWeight: 700,
+              color: '#111111',
+              letterSpacing: '-0.5px',
+              lineHeight: 1,
+            }}
+          >
+            m<span style={{ color: '#F5A623' }}>.</span>
+          </span>
         </div>
 
-        {/* Card central */}
-        <Card className="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 mx-4 space-y-6">
-          <div className="space-y-1.5 text-center">
-            <h1 className="text-xl font-bold text-gray-900 tracking-tight">
-              Acesso
-            </h1>
-            <p className="text-sm text-gray-500">
-              Use as credenciais enviadas via WhatsApp
-            </p>
-          </div>
+        <div className="h-12" />
 
-          {toastErro && (
+        {/* Heading + Subtitle */}
+        <div className="text-left">
+          <h1 className="text-[28px] font-medium text-[#111111] tracking-[-0.5px] leading-[1.1]">
+            Acesso
+          </h1>
+          <p className="text-[15px] font-normal text-[#6B6B6B] mt-1.5 leading-[1.5]">
+            Use as credenciais enviadas via WhatsApp
+          </p>
+        </div>
+
+        <div className="h-10" />
+
+        {toastErro && (
+          <div className="mb-6">
             <Toast
               message={toastErro}
               variant="error"
               onClose={() => setToastErro(null)}
             />
-          )}
+          </div>
+        )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Campo Telefone */}
-            <Input
-              label="Telefone (+55)"
-              type="tel"
-              required
-              value={telefone}
-              onChange={(e) => setTelefone(formatPhone(e.target.value))}
-              placeholder="+55 (11) 99999-0001"
-              leftIcon={<Phone className="w-4 h-4" />}
-            />
+        <form onSubmit={handleSubmit}>
+          {/* Label: TELEFONE + Input underline */}
+          <Input
+            label="TELEFONE"
+            type="tel"
+            required
+            value={telefone}
+            onChange={(e) => setTelefone(formatPhone(e.target.value))}
+            placeholder="+55 (11) 99999-0001"
+          />
 
-            {/* Campo Chave de Acesso */}
-            <Input
-              label="Chave de Acesso (6 dígitos)"
-              type="password"
-              required
-              maxLength={6}
-              inputMode="numeric"
-              pattern="[0-9]*"
-              value={chaveAcesso}
-              onChange={(e) => setChaveAcesso(e.target.value.replace(/\D/g, ''))}
-              placeholder="••••••"
-              leftIcon={<Lock className="w-4 h-4" />}
-            />
+          <div className="h-8" />
 
-            {/* Botão Primário Full-Width */}
-            <div className="pt-2">
-              <Button
-                type="submit"
-                variant="primary"
-                fullWidth
-                loading={loading}
-                className="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold rounded-xl px-6 py-3 min-h-[48px] w-full transition-all duration-200 shadow-sm"
-              >
-                {!loading && (
-                  <>
-                    <span>Entrar</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </>
-                )}
-              </Button>
-            </div>
-          </form>
+          {/* Label: CHAVE DE ACESSO + Input underline */}
+          <Input
+            label="CHAVE DE ACESSO"
+            type="password"
+            required
+            maxLength={6}
+            inputMode="numeric"
+            pattern="[0-9]*"
+            value={chaveAcesso}
+            onChange={(e) => setChaveAcesso(e.target.value.replace(/\D/g, ''))}
+            placeholder="••••••"
+          />
 
-          {/* Texto auxiliar */}
-          <p className="text-xs text-center text-gray-400 pt-1 leading-relaxed">
-            MetricLab • Inteligência Operacional
-          </p>
-        </Card>
+          <div className="h-10" />
+
+          {/* Botão Entrar preto full-width 48px */}
+          <Button
+            type="submit"
+            variant="primary"
+            fullWidth
+            loading={loading}
+            className="w-full bg-[#111111] text-white text-[14px] font-medium rounded-[6px] h-[48px]"
+          >
+            Entrar
+          </Button>
+        </form>
+
+        <div className="h-4" />
+
+        <p className="text-[11px] font-normal text-[#9B9B9B] text-center">
+          MetricLab · Consórcio Pacote 15 e 19
+        </p>
       </div>
 
-      {/* Footer minimalista */}
-      <footer className="w-full text-center py-2 text-xs text-gray-400">
-        MetricLab • Consórcio Pacote 15 e 19
+      <footer className="w-full text-center py-2 text-[11px] text-[#9B9B9B]">
+        MetricLab Inteligência Operacional
       </footer>
     </main>
   );

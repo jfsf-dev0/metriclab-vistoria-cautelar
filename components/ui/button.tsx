@@ -25,21 +25,21 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ) => {
     const variants = {
       primary:
-        'bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold shadow-sm transition-all duration-200 disabled:opacity-50',
+        'bg-[#111111] hover:bg-black active:bg-[#222222] text-white font-medium rounded-[6px] transition-all disabled:opacity-40',
       secondary:
-        'bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-xl transition-all duration-200 disabled:opacity-50',
+        'bg-transparent hover:bg-[#EFEFED] text-[#111111] font-normal transition-all disabled:opacity-40',
       danger:
-        'bg-red-600 hover:bg-red-700 text-white font-semibold shadow-sm transition-all duration-200 disabled:opacity-50',
+        'bg-[#111111] hover:bg-black text-white font-medium rounded-[6px] transition-all disabled:opacity-40',
       outline:
-        'bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 transition-all duration-200 disabled:opacity-50',
+        'bg-transparent border border-[#E5E5E3] hover:bg-[#EFEFED] text-[#111111] font-medium rounded-[6px] transition-all disabled:opacity-40',
       ghost:
-        'hover:bg-gray-100 text-gray-600 hover:text-gray-900 transition-all duration-200 disabled:opacity-50',
+        'hover:bg-[#EFEFED] text-[#6B6B6B] hover:text-[#111111] transition-all disabled:opacity-40',
     };
 
     const sizes = {
-      sm: 'px-3 py-1.5 text-xs min-h-[36px] rounded-lg',
-      md: 'px-6 py-3 text-sm min-h-[48px] rounded-xl font-semibold',
-      lg: 'px-6 py-3 text-base min-h-[48px] rounded-xl font-semibold',
+      sm: 'px-3 py-1.5 text-[13px] min-h-[36px]',
+      md: 'px-6 py-3 text-[14px] min-h-[48px]',
+      lg: 'px-6 py-3 text-[15px] min-h-[48px]',
     };
 
     const isDisabled = disabled || loading;
@@ -49,8 +49,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         disabled={isDisabled}
         className={cn(
-          'inline-flex items-center justify-center gap-2 transition-all duration-200 select-none cursor-pointer',
-          !isDisabled && 'active:scale-95',
+          'inline-flex items-center justify-center gap-2 transition-colors select-none cursor-pointer',
           isDisabled && 'cursor-not-allowed',
           variants[variant],
           sizes[size],

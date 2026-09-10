@@ -20,7 +20,7 @@ export function HeaderMobile({
   return (
     <header
       className={cn(
-        'sticky top-0 z-30 h-14 w-full bg-white border-b border-gray-200 shadow-sm px-4 flex items-center justify-between transition-all duration-200 select-none',
+        'sticky top-0 z-30 h-[52px] w-full bg-[#F7F7F5] border-b border-[#E5E5E3] px-5 flex items-center justify-between select-none',
         className
       )}
     >
@@ -36,14 +36,14 @@ export function HeaderMobile({
       {/* Center: Title */}
       {title && (
         <div className="flex-1 text-center px-2">
-          <h2 className="text-xs sm:text-sm font-bold text-gray-900 truncate tracking-tight">
+          <h2 className="text-[14px] font-medium text-[#111111] truncate tracking-[-0.2px]">
             {title}
           </h2>
         </div>
       )}
 
       {/* Right side: contextual action / badge / greeting */}
-      <div className="flex items-center justify-end min-w-[70px]">
+      <div className="flex items-center justify-end min-w-[70px] text-[#111111]">
         {rightAction}
       </div>
     </header>

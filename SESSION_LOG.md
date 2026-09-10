@@ -3,89 +3,64 @@
 ## Data: 09 de Setembro de 2026
 
 ### Objetivo
-Reestruturar completamente o layout e a arquitetura de interface do PWA `jfsf-dev0/metriclab-vistoria-cautelar` para seguir exatamente o design system de `gestao.metriclab.com.br` (`jfsf-dev0/mlab`), adaptando referências de texto para **"Consorcio Pacote 15 e 19"**.
+Reestruturar completamente o layout e a arquitetura de interface do PWA `jfsf-dev0/metriclab-vistoria-cautelar` para implementar o **Design System MetricLab 2.0** (referência: Runway + Linear), com paleta off-white/ink, inputs underline, tipografia refinada e layout flat.
 
 ---
 
-### Design System Implementado (Tokens `gestao.metriclab.com.br`)
-- **Background global**: `#0f172a` (slate-900) com gradiente suave `from-slate-900 via-slate-900 to-slate-800`
-- **Surface cards**: `bg-slate-800/50` com borda sutil `border-slate-700/50 rounded-2xl`
-- **Accent primário**: `#2563eb` (blue-600), hover `#1d4ed8` (blue-700)
-- **Tipografia**: Primary `text-white`, Secondary `text-slate-400`, Tertiary `text-slate-500`
-- **Inputs**: `bg-slate-800 border-slate-600 text-white placeholder:text-slate-500 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent`
-- **Botões**:
-  - Primary: `bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl px-6 py-3 transition-all duration-200 active:scale-95`
-  - Secondary: `bg-slate-700 hover:bg-slate-600 text-white rounded-xl active:scale-95`
-  - Danger: `bg-red-600/20 text-red-400 border border-red-500/30 font-semibold active:scale-95`
-- **Badges**: `rounded-full px-3 py-1 text-xs font-medium` (`azul`, `verde`, `vermelho`, `amarelo`, `slate`)
-- **Header Mobile**: Fixo `h-14` (56px), `bg-slate-900/95 backdrop-blur border-b border-slate-700/50`, logo MetricLab à esquerda, título centralizado, ação contextual à direita
-- **Safe Area Insets**: `pb-safe` para notch e barras de navegação mobile
+### Design System MetricLab 2.0 Implementado
+- **Tokens de Cor**:
+  - `--canvas`: `#F7F7F5` (fundo de página — off-white quente)
+  - `--surface`: `#FFFFFF` (fundo de cards quando necessário)
+  - `--hairline`: `#E5E5E3` (divisores 1px)
+  - `--hairline-soft`: `#EFEFED` (divisores sutis)
+  - `--ink`: `#111111` (texto primário, botão primário)
+  - `--ink-soft`: `#3A3A3A` (headings secundários)
+  - `--graphite`: `#6B6B6B` (corpo de texto)
+  - `--stone`: `#9B9B9B` (placeholder, meta, terciário)
+  - `--ash`: `#C4C4C2` (elementos desativados)
+  - `--accent`: `#F5A623` (amarelo MetricLab só no logo e `m.`)
+- **Regras Estritas**:
+  - Zero fundos azuis, verdes ou vermelhos em botões ou badges
+  - Zero emojis na interface
+  - Zero ícones em fundos coloridos
+  - Zero bordas coloridas ou sombras pesadas
+  - Inputs em estilo Runway underline (sem caixa, borda inferior 1px hairline, focus ink)
+  - Botões primários em preto `#111111`, altura 48px, radius 6px
+  - Barra de progresso linear de 2px preenchida em `#111111`
 
 ---
 
-### Componentes Criados (`components/`)
-1. **`components/brand/MetricLabLogo.tsx`**:
-   - Ícone vetorial SVG estilizado `m.` com ponto dourado (`#FFC028`) e gradiente azul
-   - Tipografia `MetricLab` em caixa alta com kerning refinado
-2. **`components/ui/button.tsx`**:
-   - Suporte a variantes `primary`, `secondary`, `danger`, `outline`, `ghost`
-   - Tamanhos `sm`, `md`, `lg`
-   - Feedback tátil com `active:scale-95`
-   - Estado de carregamento com spinner animado (`loading`)
-3. **`components/ui/input.tsx`**:
-   - Rótulos superiores e texto auxiliar
-   - Suporte a ícones laterais (`leftIcon`)
-   - Estilização de foco com `focus:ring-2 focus:ring-blue-500`
-4. **`components/ui/card.tsx`**:
-   - Cards com fundo `bg-slate-800/50`, bordas `border-slate-700/50` e suporte a hover elevation
-   - Subcomponentes `CardHeader`, `CardTitle`, `CardDescription`, `CardContent`, `CardFooter`
-5. **`components/ui/badge.tsx`**:
-   - Variantes com opacidade de fundo e borda sutil: `azul`, `verde`, `vermelho`, `amarelo`, `slate`
-6. **`components/ui/toast.tsx`**:
-   - Notificações flutuantes no padrão mlab (`error`, `success`, `info`) com botão de fechar
-7. **`components/ui/loading-skeleton.tsx`**:
-   - Skeleton loaders animados (`animate-pulse bg-slate-700/60`) para trechos e seções do laudo
-8. **`components/layout/HeaderMobile.tsx`**:
-   - Barra superior sticky com altura de 56px, backdrop blur, logo ou botão voltar, título e badge
+### Telas Atualizadas
+1. **Splash (`/`)**:
+   - Logo central `m.` com ponto amarelo `#F5A623` (32px)
+   - Eyebrow "PROPOSTA" (11px stone uppercase)
+   - Display "Pacote 15 e 19" (72px #111111, tracking -1.2px)
+   - Subtítulo "Vistoria Cautelar" (15px graphite)
+   - Linha hairline 1px e botão "Entrar" preto full-width (48px)
+2. **Login (`/login`)**:
+   - Layout sem card externo direto na página canvas
+   - Heading "Acesso" (28px #111111) e subtítulo
+   - Inputs underline para TELEFONE e CHAVE DE ACESSO
+   - Botão "Entrar" preto full-width
+3. **Trechos (`/trechos`)**:
+   - Header minimalista com logo "m." e saudação
+   - Eyebrow "TRECHOS DISPONÍVEIS" (11px stone)
+   - Lista flat sem cards com divisores hairline 1px
+   - Linhas com nome do trecho, quilometragem e chevron sutil
+4. **Vistoria (`/vistoria/novo`)**:
+   - Header com botão texto "← Voltar", nome do trecho e contador "1 de 4"
+   - Barra de progresso de 2px
+   - Passo 1: Inputs underline para dados da residência
+   - Passo 2: Checklist flat com botões Sim/Não com estado ativo em preto
+   - Passo 3: Área de câmera dashed minimalista e grid de fotos
+   - Passo 4: Assinatura sobre canvas limpo e geolocalização em texto simples
+5. **Status (`/vistoria/[id]/status`)**:
+   - Layout flat centralizado
+   - Estado Analisando, Aprovada (Score 94) e Reprovada (Score 61)
+   - Checklist dos quesitos e resumo em texto graphite
+   - Ações em botões preto e secundário flat
 
 ---
 
-### Telas Reestruturadas
-1. **Tela 1 — Splash (`/`)**:
-   - Fundo gradiente sutil `from-slate-900 via-slate-900 to-slate-800` com glow radial
-   - Logo MetricLab em SVG elegante no topo
-   - Tipografia refinada `"15 & 15"` com brilho e reflexo
-   - Subtítulo atualizado: **"Consorcio Pacote 15 e 19"**
-   - Botão primário centralizado "ENTRAR"
-2. **Tela 2 — Login (`/login`)**:
-   - Card centralizado `bg-slate-800/50 border border-slate-700/50 rounded-2xl`
-   - Inputs com ícones de telefone e cadeado, máscara e validação
-   - Botão primário full-width com estado loading
-   - Alertas de validação com componente `Toast`
-   - Texto auxiliar `text-slate-500 text-sm`
-3. **Tela 3 — Trechos (`/trechos`)**:
-   - Header mobile padronizado com saudação ao operador
-   - Cards dos trechos com hover elevation (`scale-[1.01]`), badges azuis para a etapa de obra e indicador de quilometragem
-   - Skeleton loader para a consulta inicial e Supabase Realtime para sincronização
-   - Empty state com ilustração e mensagens descritivas
-4. **Tela 4 — Formulário de Vistoria (`/vistoria/novo`)**:
-   - Header mobile com botão voltar, título do trecho e badge de progresso
-   - Barra linear de progresso no topo (`h-1 bg-slate-700` com preenchimento `bg-blue-500`)
-   - **Passo 1 (Residência)**: Inputs padronizados mlab com número, complemento e observações
-   - **Passo 2 (Checklist)**: 6 perguntas em cards individuais com botões toggle de 44px de toque mínimo (`bg-emerald-600` para SIM, `bg-red-600` para NÃO, `bg-slate-700` inativo)
-   - **Passo 3 (Fotos)**: Botão de câmera com `border-dashed border-slate-600`, grid de 2 colunas e badge com contagem
-   - **Passo 4 (Assinatura e GPS)**: Canvas touch de assinatura digital e card de geolocalização com coordenadas e botão de captura
-5. **Tela 5 — Status e Laudo (`/vistoria/[id]/status`)**:
-   - Card central de status com variações cromáticas sutis (`emerald-500/10`, `red-500/10`, `blue-500/10`)
-   - Score de conformidade em destaque (`text-[72px]` em negrito)
-   - Checklist dos quesitos com badges de conformidade
-   - Card de recomendações com ícone `AlertTriangle` amarelo
-   - Botões de compartilhamento nativo via Web Share API e retorno a nova vistoria
-
----
-
-### Banco de Dados & Infraestrutura (Supabase `keadkoqnvabhyxbrfjax`)
-- Ajustada a tabela `demo_lote15_leads` (`chave_acesso`, `lead_tipo`).
-- Ajustada a tabela `demo_lote15_vistorias` (`geolat`, `geolng`, `assinatura_url`, `numero_residencia`, `complemento`).
-- Storage bucket configurado: `demo-lote15-fotos`.
-- Contas de teste cadastradas: `5511999990001` (chave: `123456`) e `5511999990002` (chave: `654321`).
+### Verificação
+- Build Next.js 14 executado com sucesso e 0 erros de compilação ou tipagem.

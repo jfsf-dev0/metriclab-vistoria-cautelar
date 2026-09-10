@@ -5,24 +5,9 @@ import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { getSession, UserSession } from '@/lib/auth';
-import {
-  ChevronLeft,
-  Camera,
-  MapPin,
-  Check,
-  X,
-  Trash2,
-  CheckCircle2,
-  Loader2,
-  AlertCircle,
-  ArrowRight,
-} from 'lucide-react';
-import { HeaderMobile } from '@/components/layout/HeaderMobile';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Camera, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Toast } from '@/components/ui/toast';
 
 const CHECKLIST_PERGUNTAS = [
   'Imóvel está desocupado?',
@@ -100,49 +85,42 @@ function VistoriaFormContent() {
         setLoadingTrecho(false);
       }
     }
-    loadTrechoData();
-  }, [trechoId, router]);
 
-  // Setup Canvas
+    loadTrechoData();
+  }, [router, trechoId]);
+
+  // Canvas Setup
   useEffect(() => {
     if (passo === 4 && canvasRef.current) {
       const canvas = canvasRef.current;
       const ctx = canvas.getContext('2d');
       if (ctx) {
-        const dpr = window.devicePixelRatio || 1;
         const rect = canvas.getBoundingClientRect();
-        canvas.width = rect.width * dpr;
-        canvas.height = rect.height * dpr;
-        ctx.scale(dpr, dpr);
+        canvas.width = rect.width * 2;
+        canvas.height = rect.height * 2;
+        ctx.scale(2, 2);
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(0, 0, rect.width, rect.height);
-        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = '#111111';
+        ctx.lineWidth = 2;
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
-        ctx.strokeStyle = '#1e3a5f';
       }
     }
   }, [passo]);
 
-  // Canvas Drawing Handlers
   const getCanvasCoords = (e: React.TouchEvent | React.MouseEvent) => {
     if (!canvasRef.current) return { x: 0, y: 0 };
     const rect = canvasRef.current.getBoundingClientRect();
-    if ('touches' in e && e.touches.length > 0) {
-      return {
-        x: e.touches[0].clientX - rect.left,
-        y: e.touches[0].clientY - rect.top,
-      };
-    }
-    const me = e as React.MouseEvent;
+    const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
+    const clientY = 'touches' in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
     return {
-      x: me.clientX - rect.left,
-      y: me.clientY - rect.top,
+      x: clientX - rect.left,
+      y: clientY - rect.top,
     };
   };
 
   const startDrawing = (e: React.TouchEvent | React.MouseEvent) => {
-    e.preventDefault();
     if (!canvasRef.current) return;
     const ctx = canvasRef.current.getContext('2d');
     if (!ctx) return;
@@ -155,7 +133,6 @@ function VistoriaFormContent() {
 
   const draw = (e: React.TouchEvent | React.MouseEvent) => {
     if (!isDrawing || !canvasRef.current) return;
-    e.preventDefault();
     const ctx = canvasRef.current.getContext('2d');
     if (!ctx) return;
     const { x, y } = getCanvasCoords(e);
@@ -177,7 +154,6 @@ function VistoriaFormContent() {
     setHasSignature(false);
   };
 
-  // Upload Foto
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -187,7 +163,7 @@ function VistoriaFormContent() {
       const ext = file.name.split('.').pop() || 'jpg';
       const path = `vistorias/temp-${Date.now()}/${Date.now()}.${ext}`;
 
-      const { data, error } = await supabase.storage
+      const { error } = await supabase.storage
         .from('demo-lote15-fotos')
         .upload(path, file, { cacheControl: '3600', upsert: true });
 
@@ -213,7 +189,6 @@ function VistoriaFormContent() {
     setFotos((prev) => prev.filter((u) => u !== urlToRemove));
   };
 
-  // Geolocalização
   const handleCaptureGeo = () => {
     if (!navigator.geolocation) {
       setErroGeral('Geolocalização não suportada no seu dispositivo.');
@@ -230,7 +205,6 @@ function VistoriaFormContent() {
       },
       (err) => {
         console.error('Erro GPS:', err);
-        // Fallback default coordinates for demo if permission blocked
         setGeoLoc({ lat: -23.55052, lng: -46.633308 });
         setCapturingGeo(false);
       },
@@ -238,7 +212,6 @@ function VistoriaFormContent() {
     );
   };
 
-  // Step Validations
   const canAdvancePasso1 = numeroResidencia.trim().length > 0;
   const canAdvancePasso2 =
     CHECKLIST_PERGUNTAS.length > 0 &&
@@ -246,14 +219,12 @@ function VistoriaFormContent() {
   const canAdvancePasso3 = fotos.length >= 1;
   const canSubmitPasso4 = hasSignature && geoLoc !== null;
 
-  // Submissão Final da Vistoria
   const handleSubmitVistoria = async () => {
     if (!canSubmitPasso4 || submitting) return;
     setSubmitting(true);
     setErroGeral(null);
 
     try {
-      // 1. Upload da assinatura
       let assinaturaUrl = '';
       if (canvasRef.current) {
         const dataUrl = canvasRef.current.toDataURL('image/png');
@@ -273,14 +244,12 @@ function VistoriaFormContent() {
         }
       }
 
-      // 2. Montar array do checklist
       const checklistPayload = CHECKLIST_PERGUNTAS.map((pergunta, idx) => ({
         item: pergunta,
         resposta: respostas[idx] ? 'Sim' : 'Não',
         conforme: respostas[idx],
       }));
 
-      // 3. INSERT em demo_lote15_vistorias
       const { data: newVistoria, error: errVistoria } = await supabase
         .from('demo_lote15_vistorias')
         .insert({
@@ -307,16 +276,13 @@ function VistoriaFormContent() {
 
       const vistoriaId = newVistoria.id;
 
-      // 4. Chama demo_lote15_criar_checklist(vistoria_id)
       await supabase.rpc('demo_lote15_criar_checklist', { p_vistoria_id: vistoriaId });
 
-      // 5. UPDATE demo_lote15_trechos SET status='vistoria_iniciada'
       await supabase
         .from('demo_lote15_trechos')
         .update({ status: 'vistoria_iniciada', updated_at: new Date().toISOString() })
         .eq('id', trecho.id);
 
-      // 6. INSERT demo_lote15_notificacoes
       await supabase.from('demo_lote15_notificacoes').insert({
         tipo: 'vistoria_concluida',
         destinatario: session?.telefone || '5511999990001',
@@ -329,7 +295,6 @@ function VistoriaFormContent() {
         },
       });
 
-      // 7. POST webhook N8N
       const n8nWebhookUrl =
         process.env.N8N_WEBHOOK_URL ||
         'https://n8n.metriclab.com.br/webhook/vistoria-concluida';
@@ -350,7 +315,6 @@ function VistoriaFormContent() {
         console.warn('Erro ao disparar webhook N8N:', webhookErr);
       }
 
-      // 8. Navega para /vistoria/[id]/status
       router.push(`/vistoria/${vistoriaId}/status`);
     } catch (err: any) {
       console.error(err);
@@ -359,91 +323,71 @@ function VistoriaFormContent() {
     }
   };
 
+  const handleVoltar = () => {
+    if (passo === 1) {
+      router.push('/trechos');
+    } else {
+      setPasso((prev) => (prev - 1) as any);
+    }
+  };
+
+  const progressPercentage = (passo / 4) * 100;
+
   if (loadingTrecho) {
     return (
-      <main className="min-h-screen bg-gray-50 text-gray-900 flex flex-col items-center justify-center p-6">
-        <Loader2 className="w-8 h-8 text-blue-600 animate-spin mb-3" />
-        <span className="text-xs text-gray-500">Carregando dados do trecho...</span>
+      <main className="min-h-screen bg-[#F7F7F5] flex items-center justify-center text-[#9B9B9B] text-[13px]">
+        Carregando...
       </main>
     );
   }
 
-  // Progresso percentual para a barra linear
-  const progressoPercent = (passo / 4) * 100;
-
   return (
-    <main className="min-h-screen bg-gray-50 text-gray-900 flex flex-col justify-between">
-      {/* Hidden file input for camera */}
-      <input
-        type="file"
-        ref={fileInputRef}
-        onChange={handlePhotoUpload}
-        accept="image/*"
-        capture="environment"
-        className="hidden"
-      />
+    <main className="min-h-screen bg-[#F7F7F5] text-[#111111] flex flex-col justify-between">
+      {/* Header */}
+      <header className="sticky top-0 z-30 h-[52px] w-full bg-[#F7F7F5] border-b border-[#E5E5E3] px-5 flex items-center justify-between select-none">
+        <button
+          onClick={handleVoltar}
+          className="text-[14px] font-normal text-[#111111] hover:text-black cursor-pointer bg-transparent border-none p-0"
+        >
+          ← Voltar
+        </button>
 
-      {/* Header Mobile com voltar + título + badge de progresso */}
-      <HeaderMobile
-        title={trecho?.nome || 'Vistoria Cautelar'}
-        showLogo={false}
-        leftAction={
-          <button
-            onClick={() => {
-              if (passo > 1) setPasso((prev) => (prev - 1) as any);
-              else router.push('/trechos');
-            }}
-            className="p-1.5 -ml-1 text-gray-600 hover:text-gray-900 transition flex items-center gap-1 text-xs cursor-pointer active:scale-95"
-          >
-            <ChevronLeft className="w-5 h-5" />
-            <span className="font-medium">Voltar</span>
-          </button>
-        }
-        rightAction={
-          <span className="bg-blue-50 text-blue-700 border border-blue-200 rounded-full px-3 py-1 text-xs font-semibold">
-            Passo {passo} de 4
-          </span>
-        }
-      />
+        <div className="text-[14px] font-medium text-[#111111] truncate px-2 max-w-[200px]">
+          {trecho?.nome || 'Vistoria'}
+        </div>
 
-      {/* Barra de progresso linear: bg-gray-200 rounded-full h-1.5 fill: bg-blue-600 */}
-      <div className="w-full bg-gray-200 h-1.5">
+        <div className="text-[13px] font-normal text-[#9B9B9B]">
+          {passo} de 4
+        </div>
+      </header>
+
+      {/* Barra de progresso: 2px hairline-soft -> fill ink */}
+      <div className="w-full bg-[#EFEFED] h-[2px]">
         <div
-          className="h-full bg-blue-600 rounded-full transition-all duration-500 ease-out"
-          style={{ width: `${progressoPercent}%` }}
+          className="bg-[#111111] h-[2px] transition-all duration-300"
+          style={{ width: `${progressPercentage}%` }}
         />
       </div>
 
-      {/* Container Central */}
-      <div className="flex-1 py-6 max-w-md w-full mx-auto space-y-4 animate-in fade-in duration-200">
+      <div className="flex-1 max-w-md w-full mx-auto px-5 py-6">
         {erroGeral && (
-          <div className="px-4">
-            <Toast
-              message={erroGeral}
-              variant="error"
-              onClose={() => setErroGeral(null)}
-            />
+          <div className="mb-4 text-[13px] text-[#111111] bg-[#EFEFED] p-3 border border-[#E5E5E3]">
+            {erroGeral}
           </div>
         )}
 
-        {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-            PASSO 1: DADOS DA RESIDÊNCIA
-        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+        {/* PASSO 1: DADOS DA RESIDÊNCIA */}
         {passo === 1 && (
-          <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-5 mx-4 mb-4 space-y-5 animate-in fade-in duration-200">
-            <div className="space-y-1">
-              <h1 className="text-xl font-bold text-gray-900 tracking-tight">
-                Dados da Residência
-              </h1>
-              <p className="text-xs text-gray-500">
-                Informe a identificação do imóvel objeto desta vistoria
-              </p>
-            </div>
+          <div>
+            <span className="text-[11px] font-medium uppercase tracking-[0.5px] text-[#9B9B9B]">
+              DADOS DA RESIDÊNCIA
+            </span>
+            <div className="h-6" />
 
-            <div className="space-y-4">
+            <div className="space-y-6">
               <Input
-                label="Número da residência *"
-                type="number"
+                label="NÚMERO"
+                type="text"
                 required
                 value={numeroResidencia}
                 onChange={(e) => setNumeroResidencia(e.target.value)}
@@ -451,99 +395,86 @@ function VistoriaFormContent() {
               />
 
               <Input
-                label="Complemento (opcional)"
+                label="COMPLEMENTO"
                 type="text"
                 value={complemento}
                 onChange={(e) => setComplemento(e.target.value)}
-                placeholder="Ex: Casa fundos / Apto 12"
+                placeholder="Ex: Casa dos fundos, Bloco B"
               />
 
-              <div className="w-full space-y-1.5 text-left">
-                <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wide">
-                  Observações iniciais (opcional)
+              <div className="w-full text-left">
+                <label className="block text-[11px] font-medium text-[#9B9B9B] uppercase tracking-[0.5px] mb-2">
+                  OBSERVAÇÕES
                 </label>
                 <textarea
                   rows={3}
                   value={observacaoInicial}
                   onChange={(e) => setObservacaoInicial(e.target.value)}
-                  placeholder="Observações visuais preliminares sobre a fachada, vizinhança ou estado geral..."
-                  className="w-full bg-white border border-gray-300 text-gray-900 placeholder:text-gray-400 rounded-xl p-4 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
+                  placeholder="Observações prévias do imóvel..."
+                  className="w-full bg-transparent border-t-0 border-l-0 border-r-0 border-b border-[#E5E5E3] rounded-none py-2 text-[15px] text-[#111111] placeholder:text-[#9B9B9B] focus:outline-none focus:border-b-[#111111] resize-none"
                 />
               </div>
             </div>
 
-            <div className="pt-2">
-              <Button
-                variant="primary"
-                fullWidth
-                disabled={!canAdvancePasso1}
-                onClick={() => setPasso(2)}
-                className="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold rounded-xl px-6 py-3 min-h-[48px] w-full transition-all duration-200 shadow-sm"
-              >
-                <span>Próximo: Checklist</span>
-                <ArrowRight className="w-4 h-4" />
-              </Button>
-            </div>
+            <div className="h-10" />
+
+            <Button
+              onClick={() => setPasso(2)}
+              disabled={!canAdvancePasso1}
+              className="w-full bg-[#111111] text-white text-[14px] font-medium rounded-[6px] h-[48px]"
+            >
+              Próximo
+            </Button>
           </div>
         )}
 
-        {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-            PASSO 2: CHECKLIST (SIM/NÃO)
-        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+        {/* PASSO 2: CHECKLIST */}
         {passo === 2 && (
-          <div className="space-y-4 animate-in fade-in duration-200 mx-4 mb-4">
-            <div className="space-y-1">
-              <h1 className="text-xl font-bold text-gray-900 tracking-tight">
-                Checklist de Vistoria
-              </h1>
-              <p className="text-xs text-gray-500">
-                Responda todas as 6 perguntas para validar os quesitos técnicos
-              </p>
-            </div>
+          <div>
+            <span className="text-[11px] font-medium uppercase tracking-[0.5px] text-[#9B9B9B]">
+              CHECKLIST
+            </span>
+            <div className="h-4" />
 
-            <div className="space-y-3">
+            <div className="divide-y divide-[#E5E5E3]">
               {CHECKLIST_PERGUNTAS.map((pergunta, idx) => {
-                const resp = respostas[idx];
+                const answer = respostas[idx];
                 return (
                   <div
                     key={idx}
-                    className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm flex items-center justify-between gap-3 transition-all"
+                    className="py-4 flex items-center justify-between gap-4"
                   >
-                    <span className="text-sm font-medium text-gray-900 flex-1 pr-2 leading-relaxed">
-                      {idx + 1}. {pergunta}
+                    <span className="text-[15px] text-[#111111] leading-snug flex-1">
+                      {pergunta}
                     </span>
 
                     <div className="flex items-center gap-2 shrink-0">
-                      {/* SIM toggle */}
                       <button
                         type="button"
                         onClick={() =>
                           setRespostas((prev) => ({ ...prev, [idx]: true }))
                         }
-                        className={`min-h-[44px] px-4 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-1 cursor-pointer active:scale-95 ${
-                          resp === true
-                            ? 'bg-emerald-600 text-white shadow-sm'
-                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        className={`h-[32px] w-[48px] rounded-[4px] border text-[13px] font-medium transition-colors cursor-pointer ${
+                          answer === true
+                            ? 'bg-[#111111] border-[#111111] text-white'
+                            : 'bg-transparent border-[#E5E5E3] text-[#111111]'
                         }`}
                       >
-                        <Check className="w-4 h-4" />
-                        <span>Sim</span>
+                        Sim
                       </button>
 
-                      {/* NÃO toggle */}
                       <button
                         type="button"
                         onClick={() =>
                           setRespostas((prev) => ({ ...prev, [idx]: false }))
                         }
-                        className={`min-h-[44px] px-4 rounded-lg text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-1 cursor-pointer active:scale-95 ${
-                          resp === false
-                            ? 'bg-red-600 text-white shadow-sm'
-                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        className={`h-[32px] w-[48px] rounded-[4px] border text-[13px] font-medium transition-colors cursor-pointer ${
+                          answer === false
+                            ? 'bg-[#111111] border-[#111111] text-white'
+                            : 'bg-transparent border-[#E5E5E3] text-[#111111]'
                         }`}
                       >
-                        <X className="w-4 h-4" />
-                        <span>Não</span>
+                        Não
                       </button>
                     </div>
                   </div>
@@ -551,242 +482,164 @@ function VistoriaFormContent() {
               })}
             </div>
 
-            <div className="pt-2">
-              <Button
-                variant="primary"
-                fullWidth
-                disabled={!canAdvancePasso2}
-                onClick={() => setPasso(3)}
-                className="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold rounded-xl px-6 py-3 min-h-[48px] w-full transition-all duration-200 shadow-sm"
-              >
-                <span>
-                  Próximo ({Object.keys(respostas).length}/6 respondidas)
-                </span>
-                <ArrowRight className="w-4 h-4" />
-              </Button>
-            </div>
+            <div className="h-8" />
+
+            <Button
+              onClick={() => setPasso(3)}
+              disabled={!canAdvancePasso2}
+              className="w-full bg-[#111111] text-white text-[14px] font-medium rounded-[6px] h-[48px]"
+            >
+              Próximo
+            </Button>
           </div>
         )}
 
-        {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-            PASSO 3: FOTOS
-        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+        {/* PASSO 3: FOTOS */}
         {passo === 3 && (
-          <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-5 mx-4 mb-4 space-y-5 animate-in fade-in duration-200">
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <h1 className="text-xl font-bold text-gray-900 tracking-tight">
-                  Registro Fotográfico
-                </h1>
-                <p className="text-xs text-gray-500">
-                  Fotografe o imóvel e eventuais manifestações patológicas
-                </p>
-              </div>
+          <div>
+            <span className="text-[11px] font-medium uppercase tracking-[0.5px] text-[#9B9B9B]">
+              FOTOS
+            </span>
+            <div className="h-4" />
 
-              {fotos.length > 0 && (
-                <span className="bg-blue-50 text-blue-700 border border-blue-200 rounded-full px-3 py-1 text-xs font-semibold">
-                  {fotos.length} {fotos.length === 1 ? 'foto' : 'fotos'}
-                </span>
-              )}
-            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              onChange={handlePhotoUpload}
+            />
 
-            {/* Botão câmera: bg-white border-2 border-dashed border-gray-300 rounded-2xl p-8 */}
-            <button
-              type="button"
+            {/* Área câmera */}
+            <div
               onClick={() => fileInputRef.current?.click()}
-              disabled={uploadingFoto}
-              className="w-full bg-white border-2 border-dashed border-gray-300 rounded-2xl p-8 text-center hover:border-blue-400 hover:bg-blue-50 transition-all cursor-pointer flex flex-col items-center justify-center gap-2"
+              className="border border-dashed border-[#E5E5E3] rounded-[8px] p-8 bg-[#F7F7F5] flex flex-col items-center justify-center cursor-pointer hover:bg-[#EFEFED] transition-colors"
             >
               {uploadingFoto ? (
-                <>
-                  <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
-                  <span className="text-xs font-semibold text-gray-600">
-                    Enviando foto para a nuvem...
-                  </span>
-                </>
+                <Loader2 className="w-5 h-5 text-[#9B9B9B] animate-spin mb-2" />
               ) : (
-                <>
-                  <Camera className="w-8 h-8 text-gray-400" />
-                  <span className="text-sm font-medium text-gray-600">
-                    Adicionar Foto
-                  </span>
-                  <span className="text-xs text-gray-400">
-                    Toque para abrir a câmera ou galeria (mínimo 1 foto)
-                  </span>
-                </>
+                <Camera className="w-5 h-5 text-[#9B9B9B] mb-2" />
               )}
-            </button>
+              <span className="text-[13px] text-[#9B9B9B]">
+                {uploadingFoto ? 'Enviando foto...' : 'Adicionar foto'}
+              </span>
+            </div>
 
-            {/* Grid 2 colunas rounded-xl overflow-hidden com Overlay X: bg-red-500 text-white rounded-full */}
+            {/* Grid 2 colunas fotos */}
             {fotos.length > 0 && (
-              <div className="grid grid-cols-2 gap-3 pt-2">
-                {fotos.map((url, idx) => (
-                  <div
-                    key={idx}
-                    className="relative aspect-square rounded-xl overflow-hidden border border-gray-200 shadow-sm group"
-                  >
+              <div className="grid grid-cols-2 gap-3 mt-4">
+                {fotos.map((url, i) => (
+                  <div key={i} className="relative aspect-square rounded-[4px] overflow-hidden border border-[#E5E5E3] bg-[#EFEFED]">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={url}
-                      alt={`Registro fotográfico ${idx + 1}`}
+                      alt={`Foto ${i + 1}`}
                       className="w-full h-full object-cover"
                     />
                     <button
                       type="button"
-                      onClick={() => handleRemoveFoto(url)}
-                      className="absolute top-2 right-2 w-7 h-7 rounded-full bg-red-500 text-white flex items-center justify-center transition hover:bg-red-600 cursor-pointer shadow"
-                      title="Excluir foto"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRemoveFoto(url);
+                      }}
+                      className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-black/60 text-[#9B9B9B] hover:text-white flex items-center justify-center text-[12px]"
                     >
-                      <X className="w-4 h-4 text-white" />
+                      <X className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 ))}
               </div>
             )}
 
-            <div className="pt-2">
-              <Button
-                variant="primary"
-                fullWidth
-                disabled={!canAdvancePasso3}
-                onClick={() => setPasso(4)}
-                className="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold rounded-xl px-6 py-3 min-h-[48px] w-full transition-all duration-200 shadow-sm"
-              >
-                <span>
-                  Próximo ({fotos.length} foto{fotos.length === 1 ? '' : 's'})
-                </span>
-                <ArrowRight className="w-4 h-4" />
-              </Button>
-            </div>
+            <div className="h-8" />
+
+            <Button
+              onClick={() => setPasso(4)}
+              disabled={!canAdvancePasso3}
+              className="w-full bg-[#111111] text-white text-[14px] font-medium rounded-[6px] h-[48px]"
+            >
+              Próximo
+            </Button>
           </div>
         )}
 
-        {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-            PASSO 4: ASSINATURA E LOCALIZAÇÃO
-        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+        {/* PASSO 4: ASSINATURA */}
         {passo === 4 && (
-          <div className="space-y-4 animate-in fade-in duration-200 mx-4 mb-4">
-            <div className="space-y-1">
-              <h1 className="text-xl font-bold text-gray-900 tracking-tight">
-                Assinatura e Validação
-              </h1>
-              <p className="text-xs text-gray-500">
-                Assine no quadro abaixo e confirme sua geolocalização
-              </p>
-            </div>
-
-            {/* Card Assinatura: Canvas bg-white border-2 border-gray-300 rounded-xl (traço #1e3a5f) */}
-            <div className="bg-white border border-gray-200 rounded-2xl shadow-sm p-5 space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold uppercase tracking-wide text-gray-600">
-                  Assine com o dedo *
-                </span>
-                {hasSignature && (
-                  <button
-                    type="button"
-                    onClick={clearCanvas}
-                    className="text-xs text-gray-500 hover:text-red-600 transition cursor-pointer"
-                  >
-                    Limpar
-                  </button>
-                )}
-              </div>
-
-              <div className="rounded-xl overflow-hidden border-2 border-gray-300 bg-white touch-none">
-                <canvas
-                  ref={canvasRef}
-                  onMouseDown={startDrawing}
-                  onMouseMove={draw}
-                  onMouseUp={stopDrawing}
-                  onMouseLeave={stopDrawing}
-                  onTouchStart={startDrawing}
-                  onTouchMove={draw}
-                  onTouchEnd={stopDrawing}
-                  className="w-full h-[180px] cursor-crosshair block"
-                />
-              </div>
-
-              <div className="flex justify-between items-center text-[11px] text-gray-500 pt-1">
-                <span>Traço técnico (#1e3a5f) com carimbo</span>
-                {hasSignature && (
-                  <span className="text-green-700 font-medium inline-flex items-center gap-1">
-                    <Check className="w-3 h-3" /> Assinado
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {/* GPS card: bg-gray-50 border border-gray-200 rounded-xl p-3 */}
-            <div className="bg-gray-50 border border-gray-200 rounded-xl p-3 space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold uppercase tracking-wide text-gray-600">
-                  Coordenadas GPS *
-                </span>
-                {geoLoc ? (
-                  <span className="bg-green-50 text-green-700 border border-green-200 rounded-full px-3 py-0.5 text-xs font-semibold inline-flex items-center gap-1">
-                    <CheckCircle2 className="w-3 h-3" /> Confirmada
-                  </span>
-                ) : (
-                  <span className="bg-gray-100 text-gray-700 border border-gray-200 rounded-full px-3 py-0.5 text-xs font-semibold">
-                    Pendente
-                  </span>
-                )}
-              </div>
-
-              {geoLoc ? (
-                <div className="p-3 rounded-lg bg-white border border-gray-200 text-xs text-gray-700 font-mono flex items-center gap-2">
-                  <MapPin className="w-4 h-4 text-green-600 shrink-0" />
-                  <span>
-                    Lat: {geoLoc.lat} | Lng: {geoLoc.lng}
-                  </span>
-                </div>
-              ) : (
-                <p className="text-xs text-gray-500 leading-relaxed">
-                  A captura das coordenadas geográficas é obrigatória para certificar a presença física no canteiro.
-                </p>
-              )}
-
-              <Button
+          <div>
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-medium uppercase tracking-[0.5px] text-[#9B9B9B]">
+                ASSINATURA
+              </span>
+              <button
                 type="button"
-                variant="secondary"
-                fullWidth
-                onClick={handleCaptureGeo}
-                loading={capturingGeo}
+                onClick={clearCanvas}
+                className="text-[13px] text-[#9B9B9B] hover:text-[#111111] bg-transparent border-none p-0 cursor-pointer"
               >
-                {!capturingGeo && (
-                  <>
-                    <MapPin className="w-4 h-4 text-blue-600" />
-                    <span>{geoLoc ? 'Atualizar Localização GPS' : 'Capturar Localização GPS'}</span>
-                  </>
-                )}
-              </Button>
+                Limpar
+              </button>
+            </div>
+            <div className="h-3" />
+
+            {/* Canvas: border 1px solid hairline, border-radius 0, bg white, sem sombra */}
+            <div className="w-full h-44 bg-white border border-[#E5E5E3] touch-none">
+              <canvas
+                ref={canvasRef}
+                onMouseDown={startDrawing}
+                onMouseMove={draw}
+                onMouseUp={stopDrawing}
+                onMouseLeave={stopDrawing}
+                onTouchStart={startDrawing}
+                onTouchMove={draw}
+                onTouchEnd={stopDrawing}
+                className="w-full h-full block cursor-crosshair"
+              />
             </div>
 
-            {/* Botão Finalizar Vistoria */}
-            <div className="pt-2">
-              <Button
-                variant="primary"
-                size="lg"
-                fullWidth
-                disabled={!canSubmitPasso4 || submitting}
-                loading={submitting}
-                onClick={handleSubmitVistoria}
-                className="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold rounded-xl px-6 py-3 min-h-[48px] w-full transition-all duration-200 shadow-sm"
-              >
-                {!submitting && (
-                  <>
-                    <Check className="w-5 h-5" />
-                    <span>Finalizar Vistoria</span>
-                  </>
-                )}
-              </Button>
+            <div className="h-6" />
+
+            {/* GPS */}
+            <div>
+              <span className="text-[11px] font-medium uppercase tracking-[0.5px] text-[#9B9B9B] block mb-2">
+                LOCALIZAÇÃO
+              </span>
+              <div className="flex items-center justify-between py-2 border-b border-[#E5E5E3]">
+                <span className="text-[13px] text-[#6B6B6B]">
+                  {geoLoc
+                    ? `${geoLoc.lat.toFixed(5)}, ${geoLoc.lng.toFixed(5)}`
+                    : 'GPS pendente'}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleCaptureGeo}
+                  disabled={capturingGeo}
+                  className="text-[13px] text-[#111111] underline cursor-pointer bg-transparent border-none p-0"
+                >
+                  {capturingGeo
+                    ? 'Capturando...'
+                    : geoLoc
+                    ? 'Confirmada (atualizar)'
+                    : 'Capturar'}
+                </button>
+              </div>
             </div>
+
+            <div className="h-10" />
+
+            <Button
+              onClick={handleSubmitVistoria}
+              disabled={!canSubmitPasso4 || submitting}
+              loading={submitting}
+              className="w-full bg-[#111111] text-white text-[14px] font-medium rounded-[6px] h-[48px]"
+            >
+              Enviar Vistoria
+            </Button>
           </div>
         )}
       </div>
 
-      {/* Footer minimalista */}
-      <footer className="w-full text-center py-4 text-xs text-gray-400 border-t border-gray-200 bg-white pb-safe">
-        Consórcio Pacote 15 e 19 • MetricLab
+      <footer className="w-full text-center py-4 text-[11px] text-[#9B9B9B] border-t border-[#E5E5E3] bg-[#F7F7F5] pb-safe">
+        MetricLab · Consórcio Pacote 15 e 19
       </footer>
     </main>
   );
@@ -796,9 +649,9 @@ export default function VistoriaNovoPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-gray-50 text-gray-900 flex items-center justify-center p-6">
-          <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
-        </div>
+        <main className="min-h-screen bg-[#F7F7F5] flex items-center justify-center text-[#9B9B9B] text-[13px]">
+          Carregando...
+        </main>
       }
     >
       <VistoriaFormContent />

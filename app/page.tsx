@@ -3,58 +3,61 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowRight } from 'lucide-react';
-import { MetricLabLogo } from '@/components/brand/MetricLabLogo';
 import { Button } from '@/components/ui/button';
 
 export default function SplashPage() {
   const router = useRouter();
 
   return (
-    <main className="min-h-screen bg-gray-50 text-gray-900 flex flex-col justify-between items-center px-4 py-8 select-none pb-safe">
-      {/* Top: Logo MetricLab SVG azul centralizado */}
-      <div className="w-full flex justify-center pt-6">
-        <MetricLabLogo size="lg" showText={true} />
+    <main className="min-h-screen bg-[#F7F7F5] text-[#111111] flex flex-col justify-between items-center px-6 py-10 select-none pb-safe">
+      {/* [topo] Logo "m." centralizado */}
+      <div className="w-full flex justify-center pt-4">
+        <span
+          style={{
+            fontSize: '32px',
+            fontWeight: 700,
+            color: '#111111',
+            letterSpacing: '-0.5px',
+            lineHeight: 1,
+          }}
+        >
+          m<span style={{ color: '#F5A623' }}>.</span>
+        </span>
       </div>
 
-      {/* Center: Tipografia display centralizada */}
-      <div className="flex flex-col items-center justify-center text-center my-auto px-4 w-full">
-        <div className="flex items-baseline justify-center tracking-tight leading-none select-none">
-          <span className="text-8xl font-black text-blue-600 font-sans">
-            15
-          </span>
-          <span className="text-5xl font-light text-gray-400 mx-4 font-sans">
-            &
-          </span>
-          <span className="text-8xl font-black text-gray-900 font-sans">
-            15
-          </span>
-        </div>
-
-        {/* Subtítulo */}
-        <p className="text-gray-500 text-lg font-medium mt-2">
+      {/* [centro] */}
+      <div className="flex flex-col items-center justify-center text-center my-auto px-4 w-full max-w-sm">
+        <span className="text-[11px] font-medium uppercase tracking-[0.5px] text-[#9B9B9B]">
+          Proposta
+        </span>
+        <div className="h-2" />
+        <h1
+          className="text-[72px] font-medium text-[#111111] tracking-[-1.2px] leading-none"
+          style={{ fontFamily: 'var(--font-inter), sans-serif' }}
+        >
+          Pacote 15 e 19
+        </h1>
+        <div className="h-3" />
+        <p className="text-[15px] font-normal text-[#6B6B6B] leading-[1.5]">
           Vistoria Cautelar
         </p>
-
-        {/* Linha divisória */}
-        <div className="border-t border-gray-200 my-8 w-full max-w-sm" />
-
-        {/* Botão ENTRAR */}
-        <div className="w-full max-w-sm">
-          <Button
-            onClick={() => router.push('/login')}
-            className="w-full bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold rounded-xl py-4 text-base min-h-[48px] shadow-sm transition-all duration-200 flex items-center justify-center gap-2"
-          >
-            <span>ENTRAR</span>
-            <ArrowRight className="w-5 h-5 ml-1" />
-          </Button>
-        </div>
       </div>
 
-      {/* Rodapé */}
-      <footer className="text-gray-400 text-xs text-center pb-8">
-        MetricLab Inteligência Operacional
-      </footer>
+      {/* [base] + [rodapé] */}
+      <div className="w-full max-w-sm flex flex-col items-center">
+        <div className="w-full border-b border-[#E5E5E3] mb-6" />
+        <div className="w-full mb-6">
+          <Button
+            onClick={() => router.push('/login')}
+            className="w-full bg-[#111111] text-white text-[14px] font-medium rounded-[6px] h-[48px]"
+          >
+            Entrar
+          </Button>
+        </div>
+        <footer className="text-[11px] text-[#9B9B9B] text-center">
+          MetricLab Inteligência Operacional
+        </footer>
+      </div>
     </main>
   );
 }
