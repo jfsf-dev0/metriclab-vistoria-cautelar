@@ -196,4 +196,7 @@ Reestruturar completamente o layout e a arquitetura de interface do PWA `jfsf-de
   - Fallback vetorial SVG instantâneo.
 - **Limpeza de Texto**:
   - Removida completamente a frase "Se você instalou o app como PWA no seu computador, abra-o pela janela do aplicativo instalado para liberar o acesso.".
+- **Expansão em Tela Cheia no Root Layout (`app/layout.tsx`)**:
+  - Removido `max-w-md mx-auto`, `items-center` e bordas laterais simulando celular no desktop.
+  - O root layout agora possui `w-full min-h-screen flex flex-col`, expandindo para 100% da largura da tela no computador com os avisos e QR Code destacados.
 
