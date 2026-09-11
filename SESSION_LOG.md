@@ -270,4 +270,23 @@ Reestruturar completamente o layout e a arquitetura de interface do PWA `jfsf-de
 - **Validação**:
   - Build de produção (`next build`) executado e validado com sucesso (código de saída 0).
 
+---
 
+### Auditoria Visual Pré-Demo — Captura Automatizada de Screenshots (Playwright)
+- **Data**: 11 de Setembro de 2026
+- **Objetivo**: Capturar screenshots em alta fidelidade de todas as telas acessíveis do PWA Vistoria Cautelar (`vistoria.metriclab.com.br`) em viewports Mobile (`390x844` — iPhone 14) e Desktop (`1440x900` com bypass `ml_pwa_standalone=true`) para auditoria visual antes da demonstração executiva.
+- **Implementação Técnica**:
+  - Script Playwright automatizado em `/Users/joaofreire/metriclab/scripts/screenshot-audit.mjs`.
+  - Tratamento de autenticação via sessão ativa (`ml_vistoria_session` e `sessionStorage`), simulador de etapas de login (Etapa 1 identificador e Etapa 3 código de bypass demo `123456`).
+  - Supressão de banners intrusivos de instalação PWA via flag de persistência `ml_pwa_install_banner_dismissed` para registro limpo dos layouts.
+  - Screenshots capturados:
+    1. `01-splash.png`: Splash screen com display "Pacote 15 e 19" e botão Entrar.
+    2. `02-login.png`: Tela de login na Etapa 1 com input de telefone/email.
+    3. `03-login-codigo.png`: Tela de login na Etapa 3 com campo de 6 dígitos preenchido (`123456`).
+    4. `04-home.png`: Dashboard principal autenticado com cards estatísticos e feed de campo.
+    5. `05-vistoria-novo-passo1.png`: Formulário de Nova Vistoria — Passo 1 (Identificação do Imóvel).
+    6. `06-vistoria-novo-passo2.png`: Formulário de Nova Vistoria — Passo 2 (Checklist de 6 itens).
+    7. `07-vistoria-status.png`: Laudo de Vistoria Concluída com avaliação da IA (Aprovada 94 de 100).
+    8. `08-ocorrencia.png`: Formulário de Registro de Ocorrência de Campo.
+    9. `09-desktop-blocked.png`: Tela de bloqueio desktop com QR Code.
+  - Gerado painel HTML comparativo lado a lado em `screenshots/index.html`.
