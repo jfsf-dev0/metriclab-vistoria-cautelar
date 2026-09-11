@@ -9,8 +9,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'MetricLab Vistoria Cautelar',
-  description: 'Vistoria Cautelar — Consorcio Pacote 15 e 19',
+  metadataBase: new URL('https://vistoria.metriclab.com.br'),
+  title: 'Vistoria de Campo · MetricLab',
+  description: 'Checklist parametrizável, registro fotográfico com geotag e assinatura digital. Funciona offline. Acesse pelo celular.',
   manifest: '/manifest.json',
   icons: {
     icon: [
@@ -26,6 +27,27 @@ export const metadata: Metadata = {
     capable: true,
     statusBarStyle: 'default',
     title: 'MetricLab Vistoria',
+  },
+  openGraph: {
+    title: 'Vistoria de Campo · MetricLab',
+    description: 'Checklist parametrizável, registro fotográfico com geotag e assinatura digital. Funciona offline. Acesse pelo celular.',
+    url: 'https://vistoria.metriclab.com.br',
+    siteName: 'MetricLab',
+    images: [
+      {
+        url: 'https://vistoria.metriclab.com.br/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Vistoria de Campo · MetricLab',
+      },
+    ],
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Vistoria de Campo · MetricLab',
+    description: 'Checklist parametrizável, registro fotográfico com geotag e assinatura digital. Funciona offline.',
+    images: ['https://vistoria.metriclab.com.br/og-image.jpg'],
   },
 };
 
@@ -50,6 +72,16 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta property="og:title" content="Vistoria de Campo · MetricLab" />
+        <meta property="og:description" content="Checklist parametrizável, registro fotográfico com geotag e assinatura digital. Funciona offline. Acesse pelo celular." />
+        <meta property="og:image" content="https://vistoria.metriclab.com.br/og-image.jpg" />
+        <meta property="og:url" content="https://vistoria.metriclab.com.br" />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="MetricLab" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Vistoria de Campo · MetricLab" />
+        <meta name="twitter:description" content="Checklist parametrizável, registro fotográfico com geotag e assinatura digital. Funciona offline." />
+        <meta name="twitter:image" content="https://vistoria.metriclab.com.br/og-image.jpg" />
       </head>
       <body className={`${inter.className} bg-[#F0F0F0] text-gray-900 min-h-screen antialiased flex flex-col w-full selection:bg-neutral-200 selection:text-neutral-900`}>
         <div className="w-full min-h-screen flex flex-col relative">

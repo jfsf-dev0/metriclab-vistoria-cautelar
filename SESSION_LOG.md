@@ -215,3 +215,31 @@ Reestruturar completamente o layout e a arquitetura de interface do PWA `jfsf-de
 - **Metadata (`app/layout.tsx`)**:
   - `metadata.icons` configurado com referências completas a `favicon.ico`, `favicon.svg`, `icon-192.png` e `apple-touch-icon.png`.
 
+---
+
+### Open Graph Meta Tags e Imagem Social para WhatsApp (og-image.jpg)
+- **Data**: 11 de Setembro de 2026
+- **Objetivo**: Configuração de meta tags Open Graph e Twitter Cards, e geração da imagem social (`og-image.jpg`) de 1200x630px para compartilhamento rico no WhatsApp e redes sociais.
+- **Implementação Técnica**:
+  - `app/layout.tsx`:
+    - Adicionado objeto `openGraph` e `twitter` na exportação `metadata: Metadata` com `metadataBase: new URL('https://vistoria.metriclab.com.br')`.
+    - Adicionadas tags `<meta property="og:..." />` e `<meta name="twitter:..." />` estáticas no `<head>` para compatibilidade 100% com o scraper do WhatsApp e crawlers sem execução JavaScript.
+    - Tags configuradas:
+      - `og:title`: "Vistoria de Campo · MetricLab"
+      - `og:description`: "Checklist parametrizável, registro fotográfico com geotag e assinatura digital. Funciona offline. Acesse pelo celular."
+      - `og:image`: "https://vistoria.metriclab.com.br/og-image.jpg"
+      - `og:url`: "https://vistoria.metriclab.com.br"
+      - `og:type`: "website"
+      - `og:site_name`: "MetricLab"
+      - `twitter:card`: "summary_large_image"
+      - `twitter:title`: "Vistoria de Campo · MetricLab"
+      - `twitter:description`: "Checklist parametrizável, registro fotográfico com geotag e assinatura digital. Funciona offline."
+      - `twitter:image`: "https://vistoria.metriclab.com.br/og-image.jpg"
+  - `public/og-image.jpg`:
+    - Dimensões: 1200 x 630px em formato JPEG.
+    - Fundo branco (`#FFFFFF`), barra superior de 8px em laranja MetricLab (`#F5A623`).
+    - Top-left: Logo `m.` (`m` em `#111111`, `.` em `#F5A623`) + "MetricLab" em negrito.
+    - Centro: Título "Vistoria de Campo" (Inter Bold 72px `#111111`) e subtítulo "Checklist · Foto com geotag · Assinatura digital · Offline" (Inter Regular 28px `#6B7280`).
+    - Rodapé direito: URL "vistoria.metriclab.com.br" (Inter 20px `#F5A623`).
+- **Validação**:
+  - Compilação e build Next.js 14 executados com sucesso (código 0).
