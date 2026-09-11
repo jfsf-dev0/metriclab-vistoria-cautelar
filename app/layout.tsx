@@ -36,9 +36,11 @@ export const metadata: Metadata = {
     images: [
       {
         url: 'https://vistoria.metriclab.com.br/og-image.jpg',
+        secureUrl: 'https://vistoria.metriclab.com.br/og-image.jpg',
         width: 1200,
         height: 630,
         alt: 'Vistoria de Campo · MetricLab',
+        type: 'image/jpeg',
       },
     ],
     type: 'website',
@@ -75,6 +77,11 @@ export default function RootLayout({
         <meta property="og:title" content="Vistoria de Campo · MetricLab" />
         <meta property="og:description" content="Checklist parametrizável, registro fotográfico com geotag e assinatura digital. Funciona offline. Acesse pelo celular." />
         <meta property="og:image" content="https://vistoria.metriclab.com.br/og-image.jpg" />
+        <meta property="og:image:secure_url" content="https://vistoria.metriclab.com.br/og-image.jpg" />
+        <meta property="og:image:type" content="image/jpeg" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content="Vistoria de Campo · MetricLab" />
         <meta property="og:url" content="https://vistoria.metriclab.com.br" />
         <meta property="og:type" content="website" />
         <meta property="og:site_name" content="MetricLab" />

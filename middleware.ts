@@ -11,6 +11,7 @@ export function middleware(request: NextRequest) {
     pathname === '/favicon.ico' ||
     pathname === '/sw.js' ||
     pathname === '/manifest.json' ||
+    pathname === '/og-image.jpg' ||
     /\.(svg|png|jpg|jpeg|gif|webp|ico|css|js|woff|woff2|ttf)$/i.test(pathname)
   ) {
     // Se vier com ?mode=standalone na query, grava o cookie
@@ -29,8 +30,20 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // 2. Detecção de Mobile e PWA Standalone
+  // 2. Detecção de crawlers e robôs de redes sociais (WhatsApp, Facebook, Twitter, Telegram, etc.)
+  // para geração de cards de pré-visualização (Open Graph / Twitter Card)
   const userAgent = request.headers.get('user-agent') || '';
+  const isCrawler =
+    /bot|crawler|spider|slurp|facebookexternalhit|Facebot|WhatsApp|Twitterbot|LinkedInBot|TelegramBot|Slackbot|SkypeUriPreview|meta-externalagent|Googlebot|bingbot|Applebot/i.test(
+      userAgent
+    );
+
+  // Crawlers recebem a página diretamente para ler as meta tags Open Graph sem serem redirecionados
+  if (isCrawler) {
+    return NextResponse.next();
+  }
+
+  // 3. Detecção de Mobile e PWA Standalone
   const secChUaMobile = request.headers.get('sec-ch-ua-mobile');
   const isMobile =
     /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|Tablet/i.test(userAgent) ||
@@ -62,6 +75,12 @@ export function middleware(request: NextRequest) {
       const loginUrl = new URL('/login', request.url);
       return NextResponse.redirect(loginUrl);
     }
+  }
+
+  // Se já logado e acessar / ou /login, redireciona para /home
+  const sessionCookie = request.cookies.get('ml_vistoria_session');
+  if ((pathname === '/login' || pathname === '/') && sessionCookie && sessionCookie.value) {
+    return NextResponse.redirect(new URL('/home', request.url));
   }
 
   const response = NextResponse.next();
