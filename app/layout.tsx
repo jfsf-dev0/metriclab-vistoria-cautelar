@@ -23,6 +23,8 @@ export const metadata: Metadata = {
   },
 };
 
+import { PwaManager } from '@/components/pwa/PwaManager';
+
 export const viewport: Viewport = {
   themeColor: '#ffffff',
   width: 'device-width',
@@ -45,6 +47,7 @@ export default function RootLayout({
       </head>
       <body className={`${inter.className} bg-[#F5F5F5] text-gray-900 min-h-screen antialiased flex flex-col items-center selection:bg-blue-100 selection:text-blue-900`}>
         <div className="w-full max-w-md min-h-screen flex flex-col bg-[#F5F5F5] sm:shadow-md sm:border-x sm:border-gray-200 relative">
+          <PwaManager />
           {children}
         </div>
       </body>

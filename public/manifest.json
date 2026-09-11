@@ -1,22 +1,24 @@
 {
   "name": "MetricLab Vistoria Cautelar",
   "short_name": "Vistoria",
-  "description": "Vistoria Cautelar — Consorcio Pacote 15 e 19",
-  "start_url": "/",
+  "description": "Vistoria Cautelar — Consórcio Pacote 15 e 19",
+  "start_url": "/?mode=standalone",
   "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#2563eb",
+  "background_color": "#F0F0F0",
+  "theme_color": "#111111",
   "orientation": "portrait",
   "icons": [
     {
       "src": "/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
