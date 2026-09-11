@@ -20,30 +20,32 @@ export function HeaderMobile({
   return (
     <header
       className={cn(
-        'sticky top-0 z-30 h-[52px] w-full bg-[#F7F7F5] border-b border-[#E5E5E3] px-5 flex items-center justify-between select-none',
+        'sticky top-0 z-30 h-[56px] w-full bg-white border-b border-[#E2E2DC] px-4 flex items-center justify-between select-none',
         className
       )}
     >
-      {/* Left side: either leftAction (e.g. back button) or Logo */}
-      <div className="flex items-center gap-2 min-w-[70px]">
+      {/* Left side: either leftAction (min 44x44px touch area) or Logo */}
+      <div className="flex items-center gap-1 min-w-[44px] min-h-[44px]">
         {leftAction ? (
-          leftAction
+          <div className="min-w-[44px] min-h-[44px] flex items-center justify-center -ml-2">
+            {leftAction}
+          </div>
         ) : showLogo ? (
           <MetricLabLogo size="sm" showText={true} />
         ) : null}
       </div>
 
-      {/* Center: Title */}
+      {/* Center: Title (Inter 600, 18px, letter-spacing -0.3px, #111111) */}
       {title && (
         <div className="flex-1 text-center px-2">
-          <h2 className="text-[14px] font-medium text-[#111111] truncate tracking-[-0.2px]">
+          <h2 className="text-[18px] font-semibold text-[#111111] truncate tracking-[-0.3px]">
             {title}
           </h2>
         </div>
       )}
 
-      {/* Right side: contextual action / badge / greeting */}
-      <div className="flex items-center justify-end min-w-[70px] text-[#111111]">
+      {/* Right side: contextual action (min 44x44px touch area) */}
+      <div className="flex items-center justify-end min-w-[44px] min-h-[44px] text-[#111111]">
         {rightAction}
       </div>
     </header>

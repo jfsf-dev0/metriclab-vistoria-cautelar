@@ -321,57 +321,62 @@ function VistoriaFormContent() {
     );
   }
 
-  const trechoNomeCurto = trecho?.nome?.split('—')[0]?.trim() || 'Trecho';
+  const stepTitles: Record<number, string> = {
+    1: 'Identificação do Imóvel',
+    2: 'Checklist de Vistoria',
+    3: 'Fotos da Vistoria',
+    4: 'Assinatura e Localização',
+  };
 
   return (
-    <main className="min-h-screen bg-[#F7F7F5] text-[#111111] flex flex-col justify-between">
-      {/* Header: "← Voltar" | "[Trecho]" center | "[passo] de 5" */}
-      <header className="h-[52px] bg-[#F7F7F5] border-b border-[#E5E5E3] px-6 flex items-center justify-between">
-        <button
-          onClick={() => {
-            if (passo > 1) setPasso((prev) => (prev - 1) as any);
-            else router.push('/trechos');
-          }}
-          className="text-[14px] text-[#111111] hover:underline"
-        >
-          ← Voltar
-        </button>
-        <span className="text-[16px] font-normal text-[#111111]">
-          {trechoNomeCurto}
-        </span>
-        <span className="text-[13px] font-normal text-[#9B9B9B]">
-          {passo} de 5
-        </span>
-      </header>
-
-      {/* Barra progresso: height 2px, background hairline-soft, fill ink */}
-      <div className="w-full h-[2px] bg-[#EFEFED]">
+    <main className="min-h-screen bg-[#F7F7F5] text-[#111111] flex flex-col justify-between font-sans">
+      {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          BARRA DE PROGRESSO MULTI-STEP (2PX)
+          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+      <div className="w-full h-[2px] bg-[#E2E2DC] sticky top-0 z-30">
         <div
-          className="h-full bg-[#111111] transition-all duration-500 rounded-none"
-          style={{ width: `${(passo / 5) * 100}%` }}
+          className="h-full bg-[#111111] transition-all duration-300 rounded-none"
+          style={{ width: `${(passo / 4) * 100}%` }}
         />
       </div>
 
-      {/* Conteúdo com padding 24px */}
-      <div className="flex-1 max-w-md w-full mx-auto p-6">
+      {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          HEADER UNIFICADO (56PX)
+          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+      <header className="h-[56px] bg-white border-b border-[#E2E2DC] px-4 flex items-center justify-between sticky top-[2px] z-20 select-none">
+        <button
+          type="button"
+          onClick={() => {
+            if (passo > 1) setPasso((prev) => (prev - 1) as any);
+            else router.push('/home');
+          }}
+          className="min-w-[44px] min-h-[44px] flex items-center text-[14px] font-medium text-[#111111] hover:opacity-80 transition-opacity"
+        >
+          ← Voltar
+        </button>
+        <h1 className="text-[18px] font-semibold text-[#111111] tracking-[-0.3px] truncate px-2">
+          {stepTitles[passo]}
+        </h1>
+        <div className="min-w-[44px] min-h-[44px]" />
+      </header>
+
+      {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          CONTEÚDO DO FORMULÁRIO (ESPAÇAMENTO 24PX)
+          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+      <div className="flex-1 max-w-md w-full mx-auto px-5 py-6 pb-32">
         {erroGeral && (
-          <div className="mb-6 text-[13px] text-[#111111] border-b border-[#111111] pb-2">
+          <div className="mb-6 p-4 bg-white border border-[#DC2626] text-[13px] text-[#DC2626]">
             {erroGeral}
           </div>
         )}
 
         {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
             PASSO 1 — IDENTIFICAÇÃO DO IMÓVEL
-        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         {passo === 1 && (
-          <div>
-            <span className="text-[11px] font-medium uppercase tracking-[0.5px] text-[#9B9B9B] block mb-8">
-              IDENTIFICAÇÃO DO IMÓVEL
-            </span>
-
-            {/* Label NÚMERO / LOTE + Input underline */}
-            <div className="mb-6 flex flex-col">
-              <label className="text-[11px] font-medium uppercase tracking-[0.5px] text-[#9B9B9B] mb-[6px]">
+          <div className="space-y-6">
+            <div>
+              <label className="block text-[12px] font-medium uppercase tracking-[0.08em] text-[#6B7280] mb-2">
                 NÚMERO / LOTE *
               </label>
               <input
@@ -379,292 +384,278 @@ function VistoriaFormContent() {
                 required
                 value={numeroLote}
                 onChange={(e) => setNumeroLote(e.target.value)}
-                placeholder="Ex: 54, 54B, Lote 12A"
-                className="w-full bg-transparent border-0 border-b border-[#E5E5E3] focus:border-[#111111] py-3 text-[16px] text-[#111111] placeholder:text-[#9B9B9B] outline-none rounded-none transition-colors"
+                placeholder="Ex: 154, Lote 12A"
+                className="w-full h-[48px] px-4 bg-white border border-[#E2E2DC] rounded-none text-[15px] text-[#111111] placeholder:text-[#9CA3AF] focus:border-[#111111] focus:outline-none transition-colors"
               />
             </div>
 
-            {/* Label COMPLEMENTO */}
-            <div className="mb-6 flex flex-col">
-              <label className="text-[11px] font-medium uppercase tracking-[0.5px] text-[#9B9B9B] mb-[6px]">
+            <div>
+              <label className="block text-[12px] font-medium uppercase tracking-[0.08em] text-[#6B7280] mb-2">
                 COMPLEMENTO
               </label>
               <input
                 type="text"
                 value={complemento}
                 onChange={(e) => setComplemento(e.target.value)}
-                placeholder="Casa fundos, Apto 3, Fundos..."
-                className="w-full bg-transparent border-0 border-b border-[#E5E5E3] focus:border-[#111111] py-3 text-[16px] text-[#111111] placeholder:text-[#9B9B9B] outline-none rounded-none transition-colors"
+                placeholder="Ex: Casa fundos, Apto 3..."
+                className="w-full h-[48px] px-4 bg-white border border-[#E2E2DC] rounded-none text-[15px] text-[#111111] placeholder:text-[#9CA3AF] focus:border-[#111111] focus:outline-none transition-colors"
               />
             </div>
 
-            {/* Label NOME DO MORADOR */}
-            <div className="mb-8 flex flex-col">
-              <label className="text-[11px] font-medium uppercase tracking-[0.5px] text-[#9B9B9B] mb-[6px]">
+            <div>
+              <label className="block text-[12px] font-medium uppercase tracking-[0.08em] text-[#6B7280] mb-2">
                 NOME DO MORADOR
               </label>
               <input
                 type="text"
                 value={nomeMorador}
                 onChange={(e) => setNomeMorador(e.target.value)}
-                placeholder="Nome completo"
-                className="w-full bg-transparent border-0 border-b border-[#E5E5E3] focus:border-[#111111] py-3 text-[16px] text-[#111111] placeholder:text-[#9B9B9B] outline-none rounded-none transition-colors"
+                placeholder="Nome completo do residente"
+                className="w-full h-[48px] px-4 bg-white border border-[#E2E2DC] rounded-none text-[15px] text-[#111111] placeholder:text-[#9CA3AF] focus:border-[#111111] focus:outline-none transition-colors"
               />
             </div>
 
-            <div className="w-full border-b border-[#E5E5E3] my-8" />
-
-            <span className="text-[11px] font-medium uppercase tracking-[0.5px] text-[#9B9B9B] block mb-4">
-              PERFIL DOS MORADORES
-            </span>
-
-            {/* Pergunta 1: Idosos */}
-            <div className="border-b border-[#E5E5E3] py-4 flex items-center justify-between">
-              <span className="text-[20px] font-normal leading-none text-[#111111]">
-                Há idosos no imóvel? (60+)
+            {/* Perfil dos moradores */}
+            <div>
+              <span className="block text-[12px] font-medium uppercase tracking-[0.08em] text-[#6B7280] mb-2">
+                PERFIL DOS MORADORES
               </span>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setTemIdosos(true)}
-                  className={`px-4 py-1.5 text-[14px] font-normal rounded-[4px] border transition-colors ${
-                    temIdosos === true
-                      ? 'bg-[#111111] text-white border-[#111111]'
-                      : 'border-[#E5E5E3] text-[#111111]'
-                  }`}
-                >
-                  Sim
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setTemIdosos(false)}
-                  className={`px-4 py-1.5 text-[14px] font-normal rounded-[4px] border transition-colors ${
-                    temIdosos === false
-                      ? 'bg-[#111111] text-white border-[#111111]'
-                      : 'border-[#E5E5E3] text-[#111111]'
-                  }`}
-                >
-                  Não
-                </button>
-              </div>
-            </div>
+              <div className="bg-white border border-[#E2E2DC] divide-y divide-[#E2E2DC] rounded-none">
+                {/* Idosos */}
+                <div className="p-4 flex items-center justify-between">
+                  <span className="text-[15px] text-[#111111]">
+                    Há idosos no imóvel? (60+)
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setTemIdosos(true)}
+                      className={`h-[40px] px-4 text-[14px] font-medium rounded-none border transition-colors ${
+                        temIdosos === true
+                          ? 'bg-[#111111] text-white border-[#111111]'
+                          : 'bg-white border-[#E2E2DC] text-[#111111] hover:bg-[#F7F7F5]'
+                      }`}
+                    >
+                      Sim
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setTemIdosos(false)}
+                      className={`h-[40px] px-4 text-[14px] font-medium rounded-none border transition-colors ${
+                        temIdosos === false
+                          ? 'bg-[#111111] text-white border-[#111111]'
+                          : 'bg-white border-[#E2E2DC] text-[#111111] hover:bg-[#F7F7F5]'
+                      }`}
+                    >
+                      Não
+                    </button>
+                  </div>
+                </div>
 
-            {/* Pergunta 2: Crianças */}
-            <div className="border-b border-[#E5E5E3] py-4 flex items-center justify-between">
-              <span className="text-[20px] font-normal leading-none text-[#111111]">
-                Há crianças no imóvel? (0-12)
-              </span>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setTemCriancas(true)}
-                  className={`px-4 py-1.5 text-[14px] font-normal rounded-[4px] border transition-colors ${
-                    temCriancas === true
-                      ? 'bg-[#111111] text-white border-[#111111]'
-                      : 'border-[#E5E5E3] text-[#111111]'
-                  }`}
-                >
-                  Sim
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setTemCriancas(false)}
-                  className={`px-4 py-1.5 text-[14px] font-normal rounded-[4px] border transition-colors ${
-                    temCriancas === false
-                      ? 'bg-[#111111] text-white border-[#111111]'
-                      : 'border-[#E5E5E3] text-[#111111]'
-                  }`}
-                >
-                  Não
-                </button>
-              </div>
-            </div>
+                {/* Crianças */}
+                <div className="p-4 flex items-center justify-between">
+                  <span className="text-[15px] text-[#111111]">
+                    Há crianças no imóvel? (0-12)
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setTemCriancas(true)}
+                      className={`h-[40px] px-4 text-[14px] font-medium rounded-none border transition-colors ${
+                        temCriancas === true
+                          ? 'bg-[#111111] text-white border-[#111111]'
+                          : 'bg-white border-[#E2E2DC] text-[#111111] hover:bg-[#F7F7F5]'
+                      }`}
+                    >
+                      Sim
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setTemCriancas(false)}
+                      className={`h-[40px] px-4 text-[14px] font-medium rounded-none border transition-colors ${
+                        temCriancas === false
+                          ? 'bg-[#111111] text-white border-[#111111]'
+                          : 'bg-white border-[#E2E2DC] text-[#111111] hover:bg-[#F7F7F5]'
+                      }`}
+                    >
+                      Não
+                    </button>
+                  </div>
+                </div>
 
-            {/* Pergunta 3: Desocupado */}
-            <div className="border-b border-[#E5E5E3] py-4 flex items-center justify-between">
-              <span className="text-[20px] font-normal leading-none text-[#111111]">
-                Imóvel desocupado?
-              </span>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setImovelDesocupado(true)}
-                  className={`px-4 py-1.5 text-[14px] font-normal rounded-[4px] border transition-colors ${
-                    imovelDesocupado === true
-                      ? 'bg-[#111111] text-white border-[#111111]'
-                      : 'border-[#E5E5E3] text-[#111111]'
-                  }`}
-                >
-                  Sim
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setImovelDesocupado(false)}
-                  className={`px-4 py-1.5 text-[14px] font-normal rounded-[4px] border transition-colors ${
-                    imovelDesocupado === false
-                      ? 'bg-[#111111] text-white border-[#111111]'
-                      : 'border-[#E5E5E3] text-[#111111]'
-                  }`}
-                >
-                  Não
-                </button>
-              </div>
-            </div>
+                {/* Desocupado */}
+                <div className="p-4 flex items-center justify-between">
+                  <span className="text-[15px] text-[#111111]">
+                    Imóvel desocupado?
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setImovelDesocupado(true)}
+                      className={`h-[40px] px-4 text-[14px] font-medium rounded-none border transition-colors ${
+                        imovelDesocupado === true
+                          ? 'bg-[#111111] text-white border-[#111111]'
+                          : 'bg-white border-[#E2E2DC] text-[#111111] hover:bg-[#F7F7F5]'
+                      }`}
+                    >
+                      Sim
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setImovelDesocupado(false)}
+                      className={`h-[40px] px-4 text-[14px] font-medium rounded-none border transition-colors ${
+                        imovelDesocupado === false
+                          ? 'bg-[#111111] text-white border-[#111111]'
+                          : 'bg-white border-[#E2E2DC] text-[#111111] hover:bg-[#F7F7F5]'
+                      }`}
+                    >
+                      Não
+                    </button>
+                  </div>
+                </div>
 
-            {/* Pergunta 4: Acesso */}
-            <div className="border-b border-[#E5E5E3] py-4 flex items-center justify-between">
-              <span className="text-[20px] font-normal leading-none text-[#111111]">
-                Acesso disponível?
-              </span>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setAcessoDisponivel(true)}
-                  className={`px-4 py-1.5 text-[14px] font-normal rounded-[4px] border transition-colors ${
-                    acessoDisponivel === true
-                      ? 'bg-[#111111] text-white border-[#111111]'
-                      : 'border-[#E5E5E3] text-[#111111]'
-                  }`}
-                >
-                  Sim
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setAcessoDisponivel(false)}
-                  className={`px-4 py-1.5 text-[14px] font-normal rounded-[4px] border transition-colors ${
-                    acessoDisponivel === false
-                      ? 'bg-[#111111] text-white border-[#111111]'
-                      : 'border-[#E5E5E3] text-[#111111]'
-                  }`}
-                >
-                  Não
-                </button>
+                {/* Acesso */}
+                <div className="p-4 flex items-center justify-between">
+                  <span className="text-[15px] text-[#111111]">
+                    Acesso disponível?
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setAcessoDisponivel(true)}
+                      className={`h-[40px] px-4 text-[14px] font-medium rounded-none border transition-colors ${
+                        acessoDisponivel === true
+                          ? 'bg-[#111111] text-white border-[#111111]'
+                          : 'bg-white border-[#E2E2DC] text-[#111111] hover:bg-[#F7F7F5]'
+                      }`}
+                    >
+                      Sim
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAcessoDisponivel(false)}
+                      className={`h-[40px] px-4 text-[14px] font-medium rounded-none border transition-colors ${
+                        acessoDisponivel === false
+                          ? 'bg-[#111111] text-white border-[#111111]'
+                          : 'bg-white border-[#E2E2DC] text-[#111111] hover:bg-[#F7F7F5]'
+                      }`}
+                    >
+                      Não
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
 
             {/* Observações Iniciais */}
-            <div className="mt-8 mb-10 flex flex-col">
-              <label className="text-[11px] font-medium uppercase tracking-[0.5px] text-[#9B9B9B] mb-[6px]">
+            <div>
+              <label className="block text-[12px] font-medium uppercase tracking-[0.08em] text-[#6B7280] mb-2">
                 OBSERVAÇÕES INICIAIS
               </label>
               <textarea
-                rows={4}
+                rows={3}
                 value={observacoesIniciais}
                 onChange={(e) => setObservacoesIniciais(e.target.value)}
-                placeholder="Estado aparente da fachada, vizinhança, acesso, condições gerais..."
-                className="w-full bg-transparent border-0 border-b border-[#E5E5E3] focus:border-[#111111] py-3 text-[16px] text-[#111111] placeholder:text-[#9B9B9B] outline-none rounded-none resize-none transition-colors"
+                placeholder="Estado aparente da fachada, vizinhança, acesso e condições gerais..."
+                className="w-full bg-white border border-[#E2E2DC] rounded-none p-3.5 text-[15px] text-[#111111] placeholder:text-[#9CA3AF] focus:border-[#111111] focus:outline-none resize-none transition-colors"
               />
             </div>
-
-            <button
-              onClick={() => {
-                if (!numeroLote.trim()) {
-                  setErroGeral('Informe o número ou lote do imóvel.');
-                  return;
-                }
-                setErroGeral(null);
-                setPasso(2);
-              }}
-              className="w-full h-12 bg-[#111111] hover:bg-black text-white text-[14px] font-medium rounded-[6px] transition-colors flex items-center justify-center cursor-pointer"
-            >
-              Próximo
-            </button>
           </div>
         )}
 
         {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
             PASSO 2 — CHECKLIST
-        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         {passo === 2 && (
-          <div>
-            <span className="text-[11px] font-medium uppercase tracking-[0.5px] text-[#9B9B9B] block mb-2">
-              CHECKLIST DE VISTORIA
-            </span>
-            <p className="text-[13px] font-normal text-[#9B9B9B] mb-6">
-              Responda todos os itens obrigatórios.
-            </p>
+          <div className="space-y-4">
+            <div>
+              <span className="block text-[12px] font-medium uppercase tracking-[0.08em] text-[#6B7280] mb-1">
+                ITENS OBRIGATÓRIOS
+              </span>
+              <p className="text-[13px] text-[#9CA3AF]">
+                Responda a conformidade de todos os itens de inspeção.
+              </p>
+            </div>
 
-            <div className="divide-y divide-[#E5E5E3] border-t border-[#E5E5E3] mb-10">
+            <div className="bg-white border border-[#E2E2DC] divide-y divide-[#E2E2DC] rounded-none">
               {CHECKLIST_6.map((pergunta, idx) => {
                 const resp = checklistRespostas[idx];
                 const isOpen = openChecklistIdx === idx;
-                const statusTexto = resp === undefined ? '—' : resp ? 'Sim' : 'Não';
-                const statusCor = resp === undefined ? 'text-[#C4C4C2]' : 'text-[#6B6B6B]';
+                const statusTexto = resp === undefined ? 'Pendente' : resp ? 'Conforme' : 'Não conforme';
 
                 return (
-                  <div key={idx} className="border-b border-[#E5E5E3]">
+                  <div key={idx} className="p-4 space-y-3">
                     <div
                       onClick={() => setOpenChecklistIdx(isOpen ? null : idx)}
-                      className="py-4 flex items-center justify-between cursor-pointer select-none"
+                      className="flex items-center justify-between cursor-pointer select-none"
                     >
-                      <span className="text-[20px] font-normal leading-none text-[#111111]">
-                        {pergunta}
+                      <span className="text-[15px] font-semibold text-[#111111]">
+                        {idx + 1}. {pergunta}
                       </span>
-                      <span className={`text-[14px] ${statusCor}`}>
+                      <span
+                        className={`text-[12px] font-medium ${
+                          resp === undefined
+                            ? 'text-[#9CA3AF]'
+                            : resp
+                            ? 'text-[#111111]'
+                            : 'text-[#DC2626]'
+                        }`}
+                      >
                         {statusTexto}
                       </span>
                     </div>
 
-                    {isOpen && (
-                      <div className="bg-white p-4 mb-4 flex gap-3">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setChecklistRespostas((prev) => ({ ...prev, [idx]: true }));
-                            setOpenChecklistIdx(null);
-                          }}
-                          className={`flex-1 py-2 text-[14px] font-medium rounded-[4px] border transition-colors ${
-                            resp === true
-                              ? 'bg-[#111111] text-white border-[#111111]'
-                              : 'border-[#E5E5E3] text-[#111111]'
-                          }`}
-                        >
-                          Sim
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setChecklistRespostas((prev) => ({ ...prev, [idx]: false }));
-                            setOpenChecklistIdx(null);
-                          }}
-                          className={`flex-1 py-2 text-[14px] font-medium rounded-[4px] border transition-colors ${
-                            resp === false
-                              ? 'bg-[#111111] text-white border-[#111111]'
-                              : 'border-[#E5E5E3] text-[#111111]'
-                          }`}
-                        >
-                          Não
-                        </button>
-                      </div>
-                    )}
+                    <div className="flex items-center gap-3 pt-1">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setChecklistRespostas((prev) => ({ ...prev, [idx]: true }));
+                          setOpenChecklistIdx(null);
+                        }}
+                        className={`flex-1 h-[44px] text-[14px] font-medium rounded-none border transition-colors ${
+                          resp === true
+                            ? 'bg-[#111111] text-white border-[#111111]'
+                            : 'bg-white border-[#E2E2DC] text-[#111111] hover:bg-[#F7F7F5]'
+                        }`}
+                      >
+                        Sim / Conforme
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setChecklistRespostas((prev) => ({ ...prev, [idx]: false }));
+                          setOpenChecklistIdx(null);
+                        }}
+                        className={`flex-1 h-[44px] text-[14px] font-medium rounded-none border transition-colors ${
+                          resp === false
+                            ? 'bg-[#111111] text-white border-[#111111]'
+                            : 'bg-white border-[#E2E2DC] text-[#111111] hover:bg-[#F7F7F5]'
+                        }`}
+                      >
+                        Não / Irregular
+                      </button>
+                    </div>
                   </div>
                 );
               })}
             </div>
-
-            <button
-              disabled={Object.keys(checklistRespostas).length < CHECKLIST_6.length}
-              onClick={() => setPasso(3)}
-              className="w-full h-12 bg-[#111111] hover:bg-black disabled:opacity-40 text-white text-[14px] font-medium rounded-[6px] transition-colors flex items-center justify-center cursor-pointer"
-            >
-              Próximo
-            </button>
           </div>
         )}
 
         {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
             PASSO 3 — FOTOS
-        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         {passo === 3 && (
-          <div>
-            <span className="text-[11px] font-medium uppercase tracking-[0.5px] text-[#9B9B9B] block mb-2">
-              REGISTRO FOTOGRÁFICO
-            </span>
-            <p className="text-[16px] font-normal leading-[1.5] text-[#6B6B6B] mb-6">
-              Fotografe o imóvel e condições identificadas.
-            </p>
+          <div className="space-y-6">
+            <div>
+              <span className="block text-[12px] font-medium uppercase tracking-[0.08em] text-[#6B7280] mb-1">
+                REGISTRO FOTOGRÁFICO
+              </span>
+              <p className="text-[13px] text-[#9CA3AF]">
+                Fotografe a fachada, patologias e condições estruturais do imóvel.
+              </p>
+            </div>
 
-            {/* Área câmera */}
             <input
               type="file"
               accept="image/*"
@@ -676,25 +667,28 @@ function VistoriaFormContent() {
 
             <div
               onClick={() => fileInputRef.current?.click()}
-              className="border border-dashed border-[#E5E5E3] rounded-none py-12 px-6 bg-[#F7F7F5] flex flex-col items-center justify-center cursor-pointer hover:border-[#111111] transition-colors mb-4"
+              className="border border-dashed border-[#E2E2DC] bg-white rounded-none py-10 px-4 flex flex-col items-center justify-center cursor-pointer hover:border-[#111111] transition-colors"
             >
               {uploadingFoto ? (
-                <Loader2 className="w-5 h-5 text-[#9B9B9B] animate-spin mb-2" />
+                <Loader2 className="w-6 h-6 text-[#111111] animate-spin mb-2" />
               ) : (
-                <Camera className="w-5 h-5 text-[#9B9B9B] mb-2" />
+                <Camera className="w-6 h-6 text-[#111111] mb-2" />
               )}
-              <span className="text-[14px] font-normal text-[#6B6B6B]">
-                {uploadingFoto ? 'Enviando...' : 'Adicionar foto'}
+              <span className="text-[14px] font-medium text-[#111111]">
+                {uploadingFoto ? 'Enviando imagem...' : 'Capturar ou selecionar foto'}
+              </span>
+              <span className="text-[12px] text-[#9CA3AF] mt-1">
+                Suporta JPG, PNG e WebP
               </span>
             </div>
 
-            {/* Grid 2 colunas fotos */}
+            {/* Grid 3 colunas fotos */}
             {fotos.length > 0 && (
-              <div className="grid grid-cols-2 gap-3 mb-10">
+              <div className="grid grid-cols-3 gap-2">
                 {fotos.map((foto, idx) => (
                   <div
                     key={idx}
-                    className="relative aspect-video bg-[#EFEFED] rounded-[4px] overflow-hidden group border border-[#E5E5E3]"
+                    className="relative aspect-square bg-[#F7F7F5] rounded-none overflow-hidden group border border-[#E2E2DC]"
                   >
                     <img
                       src={foto}
@@ -707,7 +701,7 @@ function VistoriaFormContent() {
                         e.stopPropagation();
                         handleRemoveFoto(idx);
                       }}
-                      className="absolute top-1 right-1 bg-black/60 text-[#9B9B9B] hover:text-white text-[12px] w-6 h-6 rounded-full flex items-center justify-center transition-colors"
+                      className="absolute top-1 right-1 bg-[#111111]/80 text-white text-[12px] w-6 h-6 rounded-none flex items-center justify-center transition-colors"
                     >
                       ×
                     </button>
@@ -715,97 +709,148 @@ function VistoriaFormContent() {
                 ))}
               </div>
             )}
-
-            <div className="h-6" />
-
-            <button
-              disabled={fotos.length === 0}
-              onClick={() => setPasso(4)}
-              className="w-full h-12 bg-[#111111] hover:bg-black disabled:opacity-40 text-white text-[14px] font-medium rounded-[6px] transition-colors flex items-center justify-center cursor-pointer"
-            >
-              Próximo
-            </button>
           </div>
         )}
 
         {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
             PASSO 4 — ASSINATURA E LOCALIZAÇÃO
-        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         {passo === 4 && (
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-[11px] font-medium uppercase tracking-[0.5px] text-[#9B9B9B]">
-                ASSINATURA
-              </span>
-              {hasSignature && (
-                <button
-                  type="button"
-                  onClick={clearCanvas}
-                  className="text-[13px] text-[#9B9B9B] hover:text-[#111111]"
-                >
-                  Limpar
-                </button>
-              )}
-            </div>
+          <div className="space-y-6">
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#6B7280]">
+                  ASSINATURA DO VISTORIADOR OU MORADOR
+                </span>
+                {hasSignature && (
+                  <button
+                    type="button"
+                    onClick={clearCanvas}
+                    className="text-[12px] text-[#6B7280] hover:text-[#111111] underline"
+                  >
+                    Limpar
+                  </button>
+                )}
+              </div>
 
-            {/* Canvas */}
-            <div className="border border-[#E5E5E3] rounded-none bg-white h-[180px] w-full overflow-hidden relative mb-8">
-              <canvas
-                ref={canvasRef}
-                onMouseDown={startDrawing}
-                onMouseMove={draw}
-                onMouseUp={stopDrawing}
-                onMouseLeave={stopDrawing}
-                onTouchStart={startDrawing}
-                onTouchMove={draw}
-                onTouchEnd={stopDrawing}
-                className="w-full h-full touch-none cursor-crosshair"
-              />
-              {!hasSignature && (
-                <div className="absolute inset-0 pointer-events-none flex items-center justify-center text-[13px] text-[#C4C4C2]">
-                  Assine com o dedo ou mouse
-                </div>
-              )}
+              <div className="border border-[#E2E2DC] rounded-none bg-white h-[180px] w-full overflow-hidden relative">
+                <canvas
+                  ref={canvasRef}
+                  onMouseDown={startDrawing}
+                  onMouseMove={draw}
+                  onMouseUp={stopDrawing}
+                  onMouseLeave={stopDrawing}
+                  onTouchStart={startDrawing}
+                  onTouchMove={draw}
+                  onTouchEnd={stopDrawing}
+                  className="w-full h-full touch-none cursor-crosshair"
+                />
+                {!hasSignature && (
+                  <div className="absolute inset-0 pointer-events-none flex items-center justify-center text-[13px] text-[#9CA3AF]">
+                    Assine com o dedo ou mouse
+                  </div>
+                )}
+              </div>
             </div>
-
-            <div className="w-full border-b border-[#E5E5E3] mb-8" />
 
             {/* LOCALIZAÇÃO */}
-            <div className="mb-10">
-              <span className="text-[11px] font-medium uppercase tracking-[0.5px] text-[#9B9B9B] block mb-2">
-                LOCALIZAÇÃO
+            <div>
+              <span className="block text-[12px] font-medium uppercase tracking-[0.08em] text-[#6B7280] mb-2">
+                GEOLOCALIZAÇÃO
               </span>
+              <div className="bg-white border border-[#E2E2DC] rounded-none p-4 flex items-center justify-between">
+                {geoLoc ? (
+                  <div>
+                    <span className="text-[12px] font-medium text-[#111111] block">
+                      Coordenadas capturadas
+                    </span>
+                    <p className="text-[13px] text-[#9CA3AF] font-mono mt-0.5">
+                      {geoLoc.lat.toFixed(6)}, {geoLoc.lng.toFixed(6)}
+                    </p>
+                  </div>
+                ) : (
+                  <div>
+                    <span className="text-[12px] font-medium text-[#6B7280] block">
+                      Localização pendente
+                    </span>
+                    <p className="text-[13px] text-[#9CA3AF] mt-0.5">
+                      Necessário para auditoria pericial
+                    </p>
+                  </div>
+                )}
 
-              {geoLoc ? (
-                <p className="text-[13px] font-normal text-[#9B9B9B]">
-                  Lat: {geoLoc.lat} · Lng: {geoLoc.lng}
-                </p>
-              ) : (
-                <button
-                  type="button"
-                  onClick={handleCaptureGPS}
-                  disabled={capturingGeo}
-                  className="text-[14px] text-[#111111] hover:underline"
-                >
-                  {capturingGeo ? 'Obtendo coordenadas...' : 'Capturar localização'}
-                </button>
-              )}
+                {!geoLoc && (
+                  <button
+                    type="button"
+                    onClick={handleCaptureGPS}
+                    disabled={capturingGeo}
+                    className="h-[40px] px-4 bg-[#111111] text-white text-[13px] font-medium rounded-none hover:bg-black active:opacity-85 transition-opacity"
+                  >
+                    {capturingGeo ? 'Obtendo...' : 'Capturar GPS'}
+                  </button>
+                )}
+              </div>
             </div>
-
-            <button
-              disabled={!hasSignature || !geoLoc || submitting}
-              onClick={handleSubmitVistoria}
-              className="w-full h-12 bg-[#111111] hover:bg-black disabled:opacity-40 text-white text-[14px] font-medium rounded-[6px] transition-colors flex items-center justify-center cursor-pointer"
-            >
-              {submitting ? 'Gravando vistoria...' : 'Enviar Vistoria'}
-            </button>
           </div>
         )}
       </div>
 
-      <footer className="w-full text-center py-4 text-[11px] text-[#9B9B9B] border-t border-[#E5E5E3]">
-        MetricLab · Pacote 15 e 19
-      </footer>
+      {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          BOTÃO FIXO INFERIOR (52PX, FULL-WIDTH, RAIO 0)
+          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-[#F7F7F5] border-t border-[#E2E2DC] z-30">
+        <div className="max-w-md mx-auto">
+          {passo === 1 && (
+            <button
+              type="button"
+              onClick={() => {
+                if (!numeroLote.trim()) {
+                  setErroGeral('Informe o número ou lote do imóvel.');
+                  return;
+                }
+                setErroGeral(null);
+                setPasso(2);
+              }}
+              className="w-full h-[52px] bg-[#111111] hover:bg-black active:opacity-85 text-white text-[15px] font-semibold rounded-none transition-opacity flex items-center justify-center cursor-pointer"
+            >
+              Próximo
+            </button>
+          )}
+
+          {passo === 2 && (
+            <button
+              type="button"
+              onClick={() => {
+                setPasso(3);
+              }}
+              className="w-full h-[52px] bg-[#111111] hover:bg-black active:opacity-85 text-white text-[15px] font-semibold rounded-none transition-opacity flex items-center justify-center cursor-pointer"
+            >
+              Próximo
+            </button>
+          )}
+
+          {passo === 3 && (
+            <button
+              type="button"
+              onClick={() => setPasso(4)}
+              className="w-full h-[52px] bg-[#111111] hover:bg-black active:opacity-85 text-white text-[15px] font-semibold rounded-none transition-opacity flex items-center justify-center cursor-pointer"
+            >
+              Próximo
+            </button>
+          )}
+
+          {passo === 4 && (
+            <button
+              type="button"
+              disabled={submitting}
+              onClick={handleSubmitVistoria}
+              className="w-full h-[52px] bg-[#111111] hover:bg-black active:opacity-85 text-white text-[15px] font-semibold rounded-none transition-opacity flex items-center justify-center cursor-pointer disabled:opacity-40"
+            >
+              {submitting ? 'Gravando vistoria...' : 'Concluir e Enviar'}
+            </button>
+          )}
+        </div>
+      </div>
     </main>
   );
 }

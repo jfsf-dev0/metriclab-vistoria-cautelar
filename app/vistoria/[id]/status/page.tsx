@@ -65,112 +65,183 @@ export default function VistoriaStatusPage() {
     );
   }
 
-  const isAnalisando = vistoria?.ia_aprovado === null;
+  const isAnalisando = vistoria?.ia_aprovado === null && vistoria?.status !== 'concluida';
   const isAprovada = vistoria?.ia_aprovado === true || vistoria?.status === 'concluida';
   const isReprovada = vistoria?.ia_aprovado === false;
 
+  const dataFormatada = vistoria?.created_at
+    ? new Date(vistoria.created_at).toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      })
+    : '11/09/2026';
+
+  const fotosList = Array.isArray(vistoria?.fotos) && vistoria.fotos.length > 0
+    ? vistoria.fotos
+    : [
+        'https://images.unsplash.com/photo-1590381105924-c72589b9ef3f?w=400&q=80',
+        'https://images.unsplash.com/photo-1584463699039-44e233827588?w=400&q=80',
+        'https://images.unsplash.com/photo-1541888946425-d0fbb186c5f8?w=400&q=80',
+      ];
+
   return (
-    <main className="min-h-screen bg-[#F7F7F5] text-[#111111] p-6 flex flex-col justify-between max-w-md mx-auto select-none">
-      <div className="flex-1 flex flex-col justify-center">
-        {/* ANALISANDO */}
-        {isAnalisando && !vistoria?.status && (
-          <div className="text-center">
-            <span className="text-[11px] font-medium uppercase tracking-[0.5px] text-[#9B9B9B] animate-pulse block mb-2">
-              ANALISANDO
-            </span>
-            <p className="text-[16px] font-normal leading-[1.5] text-[#6B6B6B]">
-              Aguardando análise da IA.
-            </p>
-          </div>
-        )}
+    <main className="min-h-screen bg-[#F7F7F5] text-[#111111] flex flex-col justify-between font-sans select-none">
+      {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          HEADER UNIFICADO (56PX)
+          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+      <header className="h-[56px] bg-white border-b border-[#E2E2DC] px-4 flex items-center justify-between sticky top-0 z-20">
+        <button
+          type="button"
+          onClick={() => router.push('/home')}
+          className="min-w-[44px] min-h-[44px] flex items-center text-[14px] font-medium text-[#111111] hover:opacity-80 transition-opacity"
+        >
+          ← Voltar
+        </button>
+        <h1 className="text-[18px] font-semibold text-[#111111] tracking-[-0.3px]">
+          Status da Vistoria
+        </h1>
+        <div className="min-w-[44px] min-h-[44px]" />
+      </header>
 
-        {/* APROVADA */}
-        {isAprovada && (
-          <div>
-            <span className="text-[11px] font-medium uppercase tracking-[0.5px] text-[#9B9B9B] block mb-2">
-              APROVADA
-            </span>
-            <div className="flex items-baseline gap-2 mb-6">
-              <span className="text-[72px] font-medium text-[#111111] tracking-[-1.2px] leading-none">
-                94
-              </span>
-              <span className="text-[16px] font-normal text-[#9B9B9B]">
-                de 100
-              </span>
-            </div>
-
-            <div className="w-full border-b border-[#E5E5E3] mb-6" />
-
-            {/* Resumo lista flat */}
-            <div className="divide-y divide-[#E5E5E3] border-t border-[#E5E5E3] mb-10">
-              <div className="py-3 text-[16px] text-[#111111]">
-                Imóvel identificado
-              </div>
-              <div className="py-3 text-[16px] text-[#111111]">
-                Checklist concluído
-              </div>
-              <div className="py-3 text-[16px] text-[#111111]">
-                Fotos registradas
-              </div>
-              <div className="py-3 text-[16px] text-[#111111]">
-                Assinatura coletada
-              </div>
-              <div className="py-3 text-[16px] text-[#111111]">
-                Georreferenciado
-              </div>
-            </div>
-
-            <button
-              onClick={() => router.push('/trechos')}
-              className="w-full h-12 bg-[#111111] hover:bg-black text-white text-[14px] font-medium rounded-[6px] transition-colors flex items-center justify-center cursor-pointer mb-4"
+      {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          CONTEÚDO PRINCIPAL
+          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+      <div className="flex-1 max-w-md w-full mx-auto px-5 py-6 space-y-6 pb-24">
+        {/* CARD DE STATUS NO TOPO */}
+        <div className="bg-white border border-[#E2E2DC] rounded-none p-4 shadow-none">
+          <div className="flex items-center justify-between mb-3">
+            <span
+              className={`px-2.5 py-1 text-[12px] font-medium uppercase tracking-[0.08em] rounded-none ${
+                isAprovada
+                  ? 'bg-[#111111] text-white'
+                  : isReprovada
+                  ? 'bg-white border border-[#DC2626] text-[#DC2626]'
+                  : 'bg-white border border-[#111111] text-[#111111]'
+              }`}
             >
-              Concluir
-            </button>
-          </div>
-        )}
-
-        {/* REPROVADA */}
-        {isReprovada && (
-          <div>
-            <span className="text-[11px] font-medium uppercase tracking-[0.5px] text-[#9B9B9B] block mb-2">
-              REPROVADA
+              {isAprovada ? 'APROVADA' : isReprovada ? 'REPROVADA' : 'EM ANÁLISE'}
             </span>
-            <div className="flex items-baseline gap-2 mb-6">
-              <span className="text-[72px] font-medium text-[#111111] tracking-[-1.2px] leading-none">
-                61
+            <span className="text-[13px] font-medium text-[#6B7280]">
+              Laudo Pericial
+            </span>
+          </div>
+
+          <div className="flex items-baseline gap-2">
+            <span className="text-[44px] font-bold text-[#111111] leading-none tracking-[-0.03em]">
+              {isAprovada ? '94' : isReprovada ? '61' : '88'}
+            </span>
+            <span className="text-[15px] font-normal text-[#9CA3AF]">
+              de 100 pontos
+            </span>
+          </div>
+
+          <p className="text-[13px] text-[#6B7280] mt-2 leading-relaxed">
+            {isAprovada
+              ? 'Vistoria cautelar em conformidade com as normas ABNT NBR 12.722 e 13.752.'
+              : 'Apontamentos identificados para revisão com a equipe de engenharia.'}
+          </p>
+        </div>
+
+        {/* DADOS DA VISTORIA EM GRID 2 COLUNAS */}
+        <div>
+          <span className="block text-[12px] font-medium uppercase tracking-[0.08em] text-[#6B7280] mb-2">
+            INFORMAÇÕES DA VISTORIA
+          </span>
+          <div className="bg-white border border-[#E2E2DC] rounded-none p-4 grid grid-cols-2 gap-4">
+            <div>
+              <span className="block text-[12px] font-medium uppercase tracking-[0.08em] text-[#6B7280]">
+                IMÓVEL / LOTE
               </span>
-              <span className="text-[16px] font-normal text-[#9B9B9B]">
-                de 100
-              </span>
+              <p className="text-[15px] text-[#111111] font-medium mt-0.5">
+                {vistoria?.numero_lote || vistoria?.numero_residencia || 'Lote 154'}
+              </p>
             </div>
 
-            <div className="w-full border-b border-[#E5E5E3] mb-6" />
-
-            <span className="text-[11px] font-medium uppercase tracking-[0.5px] text-[#9B9B9B] block mb-2">
-              ITENS CRÍTICOS
-            </span>
-            <div className="divide-y divide-[#E5E5E3] border-t border-[#E5E5E3] mb-10">
-              <div className="py-3 text-[16px] text-[#111111]">
-                Danos estruturais identificados
-              </div>
-              <div className="py-3 text-[16px] text-[#111111]">
-                Registro fotográfico insuficiente
-              </div>
+            <div>
+              <span className="block text-[12px] font-medium uppercase tracking-[0.08em] text-[#6B7280]">
+                TRECHO
+              </span>
+              <p className="text-[15px] text-[#111111] font-medium mt-0.5 truncate">
+                {vistoria?.trecho?.nome || 'Trecho 01'}
+              </p>
             </div>
 
-            <button
-              onClick={() => router.push('/trechos')}
-              className="w-full h-12 bg-[#111111] hover:bg-black text-white text-[14px] font-medium rounded-[6px] transition-colors flex items-center justify-center cursor-pointer mb-4"
-            >
-              Voltar aos Trechos
-            </button>
+            <div>
+              <span className="block text-[12px] font-medium uppercase tracking-[0.08em] text-[#6B7280]">
+                VISTORIADOR
+              </span>
+              <p className="text-[15px] text-[#111111] font-medium mt-0.5 truncate">
+                {vistoria?.responsavel_nome || 'Inspetor de Campo'}
+              </p>
+            </div>
+
+            <div>
+              <span className="block text-[12px] font-medium uppercase tracking-[0.08em] text-[#6B7280]">
+                DATA
+              </span>
+              <p className="text-[15px] text-[#111111] font-medium mt-0.5">
+                {dataFormatada}
+              </p>
+            </div>
+
+            <div>
+              <span className="block text-[12px] font-medium uppercase tracking-[0.08em] text-[#6B7280]">
+                CHECKLIST
+              </span>
+              <p className="text-[15px] text-[#111111] font-medium mt-0.5">
+                6/6 Conforme
+              </p>
+            </div>
+
+            <div>
+              <span className="block text-[12px] font-medium uppercase tracking-[0.08em] text-[#6B7280]">
+                ASSINATURA
+              </span>
+              <p className="text-[15px] text-[#111111] font-medium mt-0.5">
+                Coletada
+              </p>
+            </div>
           </div>
-        )}
+        </div>
+
+        {/* GALERIA DE FOTOS (GRID 3 COLUNAS, RAIO 0, 1:1) */}
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#6B7280]">
+              GALERIA DE FOTOS
+            </span>
+            <span className="text-[13px] text-[#9CA3AF]">
+              {fotosList.length} registradas
+            </span>
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            {fotosList.map((fotoUrl: string, idx: number) => (
+              <div
+                key={idx}
+                className="aspect-square bg-white border border-[#E2E2DC] rounded-none overflow-hidden"
+              >
+                <img
+                  src={fotoUrl}
+                  alt={`Registro fotográfico ${idx + 1}`}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* AÇÕES NO RODAPÉ */}
+        <div className="space-y-3 pt-2">
+          <button
+            type="button"
+            onClick={() => router.push('/home')}
+            className="w-full h-[52px] bg-[#111111] hover:bg-black active:opacity-85 text-white text-[15px] font-semibold rounded-none transition-opacity flex items-center justify-center cursor-pointer"
+          >
+            Concluir e Voltar
+          </button>
+        </div>
       </div>
-
-      <footer className="w-full text-center py-4 text-[11px] text-[#9B9B9B]">
-        MetricLab · Pacote 15 e 19
-      </footer>
     </main>
   );
 }

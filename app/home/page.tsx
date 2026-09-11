@@ -12,6 +12,7 @@ import {
   X,
   Loader2,
   Image as ImageIcon,
+  ChevronRight,
 } from 'lucide-react';
 
 const FICTITIOUS_NAMES = [
@@ -82,6 +83,7 @@ export default function HomePage() {
   // Feed items & raw data
   const [feedItems, setFeedItems] = useState<FeedItem[]>([]);
   const [trechosMap, setTrechosMap] = useState<TrechoMap>({});
+  const [trechosList, setTrechosList] = useState<any[]>([]);
 
   // Search filter
   const [showSearch, setShowSearch] = useState(false);
@@ -122,7 +124,7 @@ export default function HomePage() {
         .select('id, nome');
 
       const tMap: TrechoMap = {};
-      let defaultTrechoId = '132b2313-eb1c-4e54-960a-24aa39f01456';
+      let defaultTrechoId = '9c4f3b4d-a12f-48f0-a338-0ed38a089287';
 
       if (trechosData && trechosData.length > 0) {
         trechosData.forEach((t) => {
@@ -130,9 +132,23 @@ export default function HomePage() {
           const num = match ? match[1].padStart(2, '0') : '01';
           tMap[t.id] = { nome: t.nome, num };
         });
-        if (!tMap[defaultTrechoId]) {
-          defaultTrechoId = trechosData[0].id;
-        }
+        setTrechosList(
+          trechosData.map((t, idx) => ({
+            ...t,
+            progresso: idx === 0 ? 94 : idx === 1 ? 68 : 45,
+          }))
+        );
+      } else {
+        const mockTrechos = [
+          { id: '9c4f3b4d-a12f-48f0-a338-0ed38a089287', nome: 'Trecho 01 — km 15 ao km 22', progresso: 94 },
+          { id: '132b2313-eb1c-4e54-960a-24aa39f01456', nome: 'Trecho 02 — km 22 ao km 30', progresso: 68 },
+          { id: '7d3e91b2-c04f-4a31-89e2-5b9c1d0e4a77', nome: 'Trecho 03 — km 30 ao km 38', progresso: 45 },
+        ];
+        mockTrechos.forEach((t) => {
+          const match = t.nome.match(/Trecho\s*(\d+)/i);
+          tMap[t.id] = { nome: t.nome, num: match ? match[1].padStart(2, '0') : '01' };
+        });
+        setTrechosList(mockTrechos);
       }
       setTrechosMap(tMap);
 
@@ -364,20 +380,26 @@ export default function HomePage() {
 
   // Header texts
   const userName = session?.nome || 'Inspetor Demo';
-  const trechoNome = session?.trecho_nome || 'Trecho 01 — Acesso Norte';
+  const hojeDate = new Intl.DateTimeFormat('pt-BR', {
+    weekday: 'long',
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+  }).format(new Date());
+  const dataHoje = hojeDate.charAt(0).toUpperCase() + hojeDate.slice(1);
 
   return (
-    <main className="min-h-screen bg-[#F0F0F0] text-[#111111] flex flex-col justify-between font-sans">
+    <main className="min-h-screen bg-[#F7F7F5] text-[#111111] flex flex-col justify-between font-sans">
       {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-          HEADER
+          HEADER UNIFICADO
           ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-      <header className="bg-white border-b border-[#E5E5E3] px-5 py-4 shrink-0 flex items-center justify-between">
+      <header className="bg-white border-b border-[#E2E2DC] px-5 py-4 shrink-0 flex items-center justify-between">
         <div>
-          <h1 className="text-[22px] font-bold text-[#111111] leading-tight tracking-[-0.5px]">
+          <h1 className="text-[18px] font-semibold text-[#111111] leading-tight tracking-[-0.3px]">
             Olá, {userName}.
           </h1>
-          <p className="text-[13px] font-normal text-[#9B9B9B] mt-0.5">
-            Consórcio Lote 15 · {trechoNome}
+          <p className="text-[13px] font-normal text-[#9CA3AF] mt-0.5">
+            {dataHoje}
           </p>
         </div>
         <button
@@ -386,7 +408,7 @@ export default function HomePage() {
             clearSession();
             router.replace('/login');
           }}
-          className="text-[12px] font-medium text-[#6B6B6B] hover:text-[#111111] px-3 py-1.5 rounded border border-[#E5E5E3] bg-[#F7F7F5] transition-colors cursor-pointer"
+          className="text-[12px] font-medium text-[#6B7280] hover:text-[#111111] px-3 py-1.5 border border-[#E2E2DC] bg-white rounded-none transition-colors cursor-pointer"
         >
           Sair
         </button>
@@ -396,21 +418,21 @@ export default function HomePage() {
           CAMPO DE BUSCA (QUANDO ABERTO)
           ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
       {showSearch && (
-        <div className="bg-white border-b border-[#E5E5E3] px-5 py-3 flex items-center gap-2 animate-in fade-in-0 slide-in-from-top-2 duration-150 shrink-0">
-          <Search className="w-4 h-4 text-[#9B9B9B] shrink-0" />
+        <div className="bg-white border-b border-[#E2E2DC] px-5 py-3 flex items-center gap-2 animate-in fade-in-0 slide-in-from-top-2 duration-150 shrink-0">
+          <Search className="w-4 h-4 text-[#9CA3AF] shrink-0" />
           <input
             ref={searchInputRef}
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Buscar vistorias, incidentes, RDOs..."
-            className="w-full bg-transparent text-[14px] text-[#111111] placeholder:text-[#9B9B9B] focus:outline-none"
+            className="w-full bg-transparent text-[15px] text-[#111111] placeholder:text-[#9CA3AF] focus:outline-none"
           />
           {searchQuery && (
             <button
               type="button"
               onClick={() => setSearchQuery('')}
-              className="text-[#9B9B9B] hover:text-[#111111] p-1"
+              className="text-[#9CA3AF] hover:text-[#111111] p-1"
             >
               <X className="w-4 h-4" />
             </button>
@@ -418,95 +440,168 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-          PENDÊNCIAS
-          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-      <section className="bg-white border-b border-[#E5E5E3] px-5 py-3 shrink-0">
-        <div className="flex flex-row justify-between items-center max-w-md mx-auto">
-          {/* Vistorias */}
-          <div className="flex flex-col items-center justify-center flex-1">
-            <span className="text-[24px] font-bold text-[#111111] leading-none">
-              {countVistorias}
+      {/* CONTEÚDO SCROLLÁVEL */}
+      <div className="flex-1 overflow-y-auto pb-28 px-5 py-4 space-y-6 max-w-md w-full mx-auto">
+        {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            CARD DE AÇÃO RÁPIDA: INICIAR VISTORIA
+            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+        <div className="bg-white border border-[#E2E2DC] rounded-none p-4 shadow-none">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#6B7280]">
+              AÇÃO RÁPIDA
             </span>
-            <span className="text-[11px] font-normal text-[#9B9B9B] mt-1">
-              Vistorias
-            </span>
-          </div>
-
-          <div className="w-px h-7 bg-[#E5E5E3]" />
-
-          {/* Incidentes */}
-          <div className="flex flex-col items-center justify-center flex-1">
-            <span className="text-[24px] font-bold text-[#111111] leading-none">
-              {countIncidentes}
-            </span>
-            <span className="text-[11px] font-normal text-[#9B9B9B] mt-1">
-              Incidentes
+            <span className="text-[12px] font-medium text-[#F5A623]">
+              Pacote 15 e 19
             </span>
           </div>
-
-          <div className="w-px h-7 bg-[#E5E5E3]" />
-
-          {/* RDOs */}
-          <div className="flex flex-col items-center justify-center flex-1">
-            <span className="text-[24px] font-bold text-[#111111] leading-none">
-              {countRDOs}
-            </span>
-            <span className="text-[11px] font-normal text-[#9B9B9B] mt-1">
-              RDOs
-            </span>
-          </div>
+          <h2 className="text-[18px] font-semibold text-[#111111] tracking-[-0.3px]">
+            Iniciar Vistoria
+          </h2>
+          <p className="text-[13px] font-normal text-[#6B7280] mt-1 mb-4 leading-relaxed">
+            Realize o laudo fotográfico, checklist e validação estrutural do imóvel em campo.
+          </p>
+          <button
+            type="button"
+            onClick={() => {
+              const defaultTId = trechosList[0]?.id || '9c4f3b4d-a12f-48f0-a338-0ed38a089287';
+              router.push(`/vistoria/novo?trecho_id=${defaultTId}`);
+            }}
+            className="w-full h-[52px] bg-[#111111] hover:bg-black active:opacity-85 text-white text-[15px] font-semibold rounded-none transition-opacity flex items-center justify-center cursor-pointer"
+          >
+            Iniciar Vistoria
+          </button>
         </div>
-      </section>
 
-      {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-          FEED — ÚLTIMAS AÇÕES
-          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-      <section className="flex-1 bg-[#F0F0F0] pb-24 overflow-y-auto">
-        {loading && feedItems.length === 0 ? (
-          <div className="p-5 space-y-3">
-            {[1, 2, 3, 4, 5].map((idx) => (
+        {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            LISTA DE TRECHOS
+            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+        <div>
+          <span className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#6B7280] block mb-2">
+            TRECHOS DISPONÍVEIS
+          </span>
+          <div className="bg-white border border-[#E2E2DC] divide-y divide-[#E2E2DC] rounded-none shadow-none">
+            {trechosList.map((t) => (
               <div
-                key={idx}
-                className="bg-white p-4 border-b border-[#E5E5E3] animate-pulse h-[68px]"
-              />
-            ))}
-          </div>
-        ) : filteredFeed.length === 0 ? (
-          <div className="p-8 text-center">
-            <p className="text-[14px] text-[#6B6B6B]">
-              {searchQuery
-                ? 'Nenhum registro encontrado para a busca.'
-                : 'Nenhuma ação registrada ainda.'}
-            </p>
-          </div>
-        ) : (
-          <div className="divide-y-0">
-            {filteredFeed.map((item) => (
-              <div
-                key={`${item.tipoItem}-${item.id}`}
-                onClick={() => setSelectedItem(item)}
-                className="bg-white px-5 py-3.5 border-b border-[#E5E5E3] cursor-pointer active:bg-[#F7F7F7] hover:bg-[#FAFAFA] transition-colors select-none"
+                key={t.id}
+                onClick={() => router.push(`/vistoria/novo?trecho_id=${t.id}`)}
+                className="px-4 py-3.5 flex items-center justify-between hover:bg-[#FAFAFA] active:bg-[#F7F7F5] cursor-pointer select-none transition-colors"
               >
-                {/* Linha 1 */}
-                <div className="flex justify-between items-center">
-                  <span className="text-[14px] font-medium text-[#111111]">
-                    {item.linha1Titulo}
-                  </span>
-                  <span className="text-[13px] font-normal text-[#9B9B9B]">
-                    {item.dateFormatted}
-                  </span>
+                <div>
+                  <h3 className="text-[15px] font-semibold text-[#111111]">
+                    {t.nome}
+                  </h3>
+                  <p className="text-[13px] font-medium text-[#6B7280] mt-0.5">
+                    {t.progresso}% concluído
+                  </p>
                 </div>
-
-                {/* Linha 2 */}
-                <p className="text-[13px] font-normal text-[#6B6B6B] mt-0.5 truncate">
-                  {item.linha2Detalhe}
-                </p>
+                <div className="flex items-center gap-2 text-[#9CA3AF]">
+                  <span className="text-[13px] font-normal text-[#9CA3AF]">Acessar</span>
+                  <ChevronRight className="w-4 h-4 text-[#9CA3AF]" />
+                </div>
               </div>
             ))}
           </div>
-        )}
-      </section>
+        </div>
+
+        {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            PENDÊNCIAS
+            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+        <section className="bg-white border border-[#E2E2DC] rounded-none p-4 shadow-none">
+          <div className="flex flex-row justify-between items-center">
+            {/* Vistorias */}
+            <div className="flex flex-col items-center justify-center flex-1">
+              <span className="text-[22px] font-bold text-[#111111] leading-none">
+                {countVistorias}
+              </span>
+              <span className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#6B7280] mt-1.5">
+                Vistorias
+              </span>
+            </div>
+
+            <div className="w-px h-8 bg-[#E2E2DC]" />
+
+            {/* Incidentes */}
+            <div className="flex flex-col items-center justify-center flex-1">
+              <span className="text-[22px] font-bold text-[#111111] leading-none">
+                {countIncidentes}
+              </span>
+              <span className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#6B7280] mt-1.5">
+                Incidentes
+              </span>
+            </div>
+
+            <div className="w-px h-8 bg-[#E2E2DC]" />
+
+            {/* RDOs */}
+            <div className="flex flex-col items-center justify-center flex-1">
+              <span className="text-[22px] font-bold text-[#111111] leading-none">
+                {countRDOs}
+              </span>
+              <span className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#6B7280] mt-1.5">
+                RDOs
+              </span>
+            </div>
+          </div>
+        </section>
+
+        {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            FEED — ATIVIDADES RECENTES
+            ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+        <section>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#6B7280]">
+              ATIVIDADES RECENTES
+            </span>
+            <span className="text-[13px] text-[#9CA3AF]">
+              {filteredFeed.length} registros
+            </span>
+          </div>
+
+          {loading && feedItems.length === 0 ? (
+            <div className="bg-white border border-[#E2E2DC] p-4 space-y-3">
+              {[1, 2, 3].map((idx) => (
+                <div
+                  key={idx}
+                  className="bg-[#F7F7F5] animate-pulse h-[52px]"
+                />
+              ))}
+            </div>
+          ) : filteredFeed.length === 0 ? (
+            <div className="bg-white border border-[#E2E2DC] p-6 text-center">
+              <p className="text-[14px] text-[#6B7280]">
+                {searchQuery
+                  ? 'Nenhum registro encontrado para a busca.'
+                  : 'Nenhuma atividade registrada ainda.'}
+              </p>
+            </div>
+          ) : (
+            <div className="bg-white border border-[#E2E2DC] divide-y divide-[#E2E2DC] rounded-none shadow-none">
+              {filteredFeed.map((item) => (
+                <div
+                  key={`${item.tipoItem}-${item.id}`}
+                  onClick={() => setSelectedItem(item)}
+                  className="px-4 py-3.5 hover:bg-[#FAFAFA] active:bg-[#F7F7F5] cursor-pointer select-none transition-colors"
+                >
+                  {/* Linha 1: Título e Data */}
+                  <div className="flex justify-between items-center">
+                    <span className="text-[15px] font-semibold text-[#111111]">
+                      {item.linha1Titulo}
+                    </span>
+                    <span className="text-[13px] font-normal text-[#9CA3AF]">
+                      {item.dateFormatted}
+                    </span>
+                  </div>
+
+                  {/* Linha 2: Detalhes */}
+                  <p className="text-[13px] font-normal text-[#6B7280] mt-0.5 truncate">
+                    {item.linha2Detalhe}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      </div>
 
       {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
           BOTTOM SHEET MODAL
@@ -852,7 +947,7 @@ export default function HomePage() {
           BOTTOM NAVIGATION (FIXED)
           ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
       <nav
-        className="fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-[#E5E5E3] select-none"
+        className="fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-[#E2E2DC] select-none"
         style={{
           height: '64px',
           paddingBottom: 'env(safe-area-inset-bottom, 0px)',
@@ -869,8 +964,8 @@ export default function HomePage() {
             }}
             className="flex flex-col items-center justify-center flex-1 h-full cursor-pointer transition-colors"
           >
-            <HomeIcon className="w-[22px] h-[22px] text-[#111111]" />
-            <span className="text-[10px] font-semibold text-[#111111] mt-1 leading-none">
+            <HomeIcon className="w-[20px] h-[20px] text-[#111111]" />
+            <span className="text-[12px] font-semibold text-[#111111] mt-1 leading-none">
               Vistoria
             </span>
           </button>
@@ -881,8 +976,8 @@ export default function HomePage() {
             onClick={() => router.push('/rdo/novo')}
             className="flex flex-col items-center justify-center flex-1 h-full cursor-pointer transition-colors group"
           >
-            <ClipboardList className="w-[22px] h-[22px] text-[#C4C4C2] group-hover:text-[#111111] transition-colors" />
-            <span className="text-[10px] font-normal text-[#C4C4C2] group-hover:text-[#111111] mt-1 leading-none transition-colors">
+            <ClipboardList className="w-[20px] h-[20px] text-[#9CA3AF] group-hover:text-[#111111] transition-colors" />
+            <span className="text-[12px] font-medium text-[#9CA3AF] group-hover:text-[#111111] mt-1 leading-none transition-colors">
               RDO
             </span>
           </button>
@@ -893,8 +988,8 @@ export default function HomePage() {
             onClick={() => router.push('/ocorrencia')}
             className="flex flex-col items-center justify-center flex-1 h-full cursor-pointer transition-colors group"
           >
-            <AlertTriangle className="w-[22px] h-[22px] text-[#C4C4C2] group-hover:text-[#111111] transition-colors" />
-            <span className="text-[10px] font-normal text-[#C4C4C2] group-hover:text-[#111111] mt-1 leading-none transition-colors">
+            <AlertTriangle className="w-[20px] h-[20px] text-[#9CA3AF] group-hover:text-[#111111] transition-colors" />
+            <span className="text-[12px] font-medium text-[#9CA3AF] group-hover:text-[#111111] mt-1 leading-none transition-colors">
               Incidente
             </span>
           </button>
@@ -908,15 +1003,15 @@ export default function HomePage() {
             className="flex flex-col items-center justify-center flex-1 h-full cursor-pointer transition-colors"
           >
             <Search
-              className={`w-[22px] h-[22px] transition-colors ${
-                showSearch ? 'text-[#111111]' : 'text-[#C4C4C2]'
+              className={`w-[20px] h-[20px] transition-colors ${
+                showSearch ? 'text-[#111111]' : 'text-[#9CA3AF]'
               }`}
             />
             <span
-              className={`text-[10px] mt-1 leading-none transition-colors ${
+              className={`text-[12px] mt-1 leading-none transition-colors ${
                 showSearch
                   ? 'font-semibold text-[#111111]'
-                  : 'font-normal text-[#C4C4C2]'
+                  : 'font-medium text-[#9CA3AF]'
               }`}
             >
               Buscar
