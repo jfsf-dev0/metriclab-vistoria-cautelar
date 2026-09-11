@@ -8,6 +8,7 @@ import {
   requestNotificationPermission,
   subscribeUserToPush,
 } from '@/lib/pushNotifications';
+import { getSession } from '@/lib/auth';
 import { PwaInstallBanner } from './PwaInstallBanner';
 
 export function PwaManager() {
@@ -65,15 +66,11 @@ export function PwaManager() {
     try {
       const perm = await requestNotificationPermission();
       if (perm === 'granted') {
-        // Recupera dados do usuário do localStorage se logado
         let userId = 'inspetor-lote15';
         try {
-          const session = localStorage.getItem('ml_vistoria_session');
-          if (session) {
-            const parsed = JSON.parse(session);
-            if (parsed.id || parsed.email || parsed.usuario_id) {
-              userId = parsed.id || parsed.email || parsed.usuario_id;
-            }
+          const s = getSession();
+          if (s && (s.lead_id || s.nome || s.telefone)) {
+            userId = s.lead_id || s.nome || s.telefone;
           }
         } catch {
           // fallback

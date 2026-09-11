@@ -61,7 +61,27 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(blockedUrl);
   }
 
-  // 4. Proteção de autenticação (somente para telas restritas)
+  // 4. Ao acessar / ou /login: SEMPRE exige novo login ao abrir o PWA
+  if (pathname === '/login' || pathname === '/') {
+    const response = NextResponse.next();
+    // Limpa qualquer cookie de sessão residual
+    if (request.cookies.has('ml_vistoria_session')) {
+      response.cookies.delete('ml_vistoria_session');
+    }
+    if (
+      request.nextUrl.searchParams.get('mode') === 'standalone' ||
+      request.nextUrl.searchParams.get('display-mode') === 'standalone'
+    ) {
+      response.cookies.set('ml_pwa_standalone', 'true', {
+        path: '/',
+        maxAge: 60 * 60 * 24 * 365,
+        sameSite: 'lax',
+      });
+    }
+    return response;
+  }
+
+  // 5. Proteção de autenticação (somente para telas restritas)
   const isProtected =
     pathname.startsWith('/trechos') ||
     pathname.startsWith('/vistoria') ||
@@ -75,12 +95,6 @@ export function middleware(request: NextRequest) {
       const loginUrl = new URL('/login', request.url);
       return NextResponse.redirect(loginUrl);
     }
-  }
-
-  // Se já logado e acessar / ou /login, redireciona para /home
-  const sessionCookie = request.cookies.get('ml_vistoria_session');
-  if ((pathname === '/login' || pathname === '/') && sessionCookie && sessionCookie.value) {
-    return NextResponse.redirect(new URL('/home', request.url));
   }
 
   const response = NextResponse.next();

@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { getSession, UserSession } from '@/lib/auth';
+import { getSession, clearSession, UserSession } from '@/lib/auth';
 import {
   Home as HomeIcon,
   ClipboardList,
@@ -371,13 +371,25 @@ export default function HomePage() {
       {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
           HEADER
           ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-      <header className="bg-white border-b border-[#E5E5E3] px-5 py-4 shrink-0">
-        <h1 className="text-[22px] font-bold text-[#111111] leading-tight tracking-[-0.5px]">
-          Olá, {userName}.
-        </h1>
-        <p className="text-[13px] font-normal text-[#9B9B9B] mt-0.5">
-          Consórcio Lote 15 · {trechoNome}
-        </p>
+      <header className="bg-white border-b border-[#E5E5E3] px-5 py-4 shrink-0 flex items-center justify-between">
+        <div>
+          <h1 className="text-[22px] font-bold text-[#111111] leading-tight tracking-[-0.5px]">
+            Olá, {userName}.
+          </h1>
+          <p className="text-[13px] font-normal text-[#9B9B9B] mt-0.5">
+            Consórcio Lote 15 · {trechoNome}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            clearSession();
+            router.replace('/login');
+          }}
+          className="text-[12px] font-medium text-[#6B6B6B] hover:text-[#111111] px-3 py-1.5 rounded border border-[#E5E5E3] bg-[#F7F7F5] transition-colors cursor-pointer"
+        >
+          Sair
+        </button>
       </header>
 
       {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

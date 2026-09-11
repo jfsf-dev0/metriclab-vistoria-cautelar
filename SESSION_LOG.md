@@ -249,3 +249,25 @@ Reestruturar completamente o layout e a arquitetura de interface do PWA `jfsf-de
 - **Validação**:
   - Compilação e build Next.js 14 executados com sucesso (código 0).
 
+---
+
+### Forçar Login ao Abrir o PWA & Eliminação de Acesso via LocalStorage
+- **Data**: 11 de Setembro de 2026
+- **Objetivo**: Garantir que o PWA sempre exija login ao ser aberto ou iniciado, eliminando qualquer auto-login persistente via `localStorage` ou cookies de longa duração, permitindo acesso às áreas restritas unicamente a usuários autenticados na sessão ativa.
+- **Implementação Técnica**:
+  - `lib/auth.ts`:
+    - Substituído armazenamento persistente em `localStorage` por `sessionStorage` e **Session Cookie** HTTP (sem atributos `max-age` ou `expires`, com descarte automático ao fechar a janela/PWA).
+    - Adicionada rotina em `getSession()`, `setSession()` e `clearSession()` para remover ativamente chaves residuais de `localStorage` (`ml_vistoria_session`).
+  - `middleware.ts`:
+    - Removido o bloco de redirecionamento automático que desviava requisições de `/` e `/login` diretamente para `/home` quando havia cookie de sessão existente.
+    - Adicionado purge do cookie de sessão ao carregar a página `/` ou `/login`, garantindo que todo novo acesso ao PWA exija autenticação.
+    - Mantida proteção de rotas restritas (`/trechos`, `/vistoria/*`, `/home`, `/rdo`, `/ocorrencia`) exigindo cookie de sessão ativo.
+  - `app/login/page.tsx`:
+    - Adicionado hook de montagem (`useEffect`) que aciona `clearSession()` imediatamente, garantindo que qualquer estado residual de sessão seja destruído antes de nova autenticação.
+  - `app/home/page.tsx`, `components/pwa/PwaManager.tsx`:
+    - Removidos acessos diretos a `localStorage.getItem('ml_vistoria_session')`, padronizando o consumo através de `getSession()` do módulo `@/lib/auth`.
+    - Adicionado botão "Sair" no header principal (`/home`) para encerramento explícito de sessão com limpeza de tokens e redirecionamento para `/login`.
+- **Validação**:
+  - Build de produção (`next build`) executado e validado com sucesso (código de saída 0).
+
+
