@@ -68,7 +68,10 @@ interface TrechoMap {
   };
 }
 
+import { useDesktopBlock } from '@/hooks/useDesktopBlock';
+
 export default function HomePage() {
+  useDesktopBlock();
   const router = useRouter();
   const searchInputRef = useRef<HTMLInputElement>(null);
 

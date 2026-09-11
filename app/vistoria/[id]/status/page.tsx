@@ -4,8 +4,10 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import { useDesktopBlock } from '@/hooks/useDesktopBlock';
 
 export default function VistoriaStatusPage() {
+  useDesktopBlock();
   const params = useParams();
   const router = useRouter();
   const vistoriaId = params?.id as string;

@@ -16,7 +16,10 @@ const CHECKLIST_6 = [
   'Riscos de segurança identificados?',
 ];
 
+import { useDesktopBlock } from '@/hooks/useDesktopBlock';
+
 function VistoriaFormContent() {
+  useDesktopBlock();
   const router = useRouter();
   const searchParams = useSearchParams();
   const trechoId = searchParams.get('trecho_id');

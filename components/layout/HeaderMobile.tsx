@@ -1,6 +1,8 @@
+'use client';
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { MetricLabLogo } from '@/components/brand/MetricLabLogo';
+import { useDesktopBlock } from '@/hooks/useDesktopBlock';
 
 export interface HeaderMobileProps {
   title?: string;
@@ -17,6 +19,8 @@ export function HeaderMobile({
   showLogo = true,
   className,
 }: HeaderMobileProps) {
+  useDesktopBlock();
+
   return (
     <header
       className={cn(
