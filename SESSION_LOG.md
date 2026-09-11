@@ -172,3 +172,13 @@ Reestruturar completamente o layout e a arquitetura de interface do PWA `jfsf-de
   - Persistência de dispensa no `localStorage` sob `ml_pwa_install_banner_dismissed`.
   - Integração no `app/layout.tsx` através do `<PwaManager />`.
 
+---
+
+### Bloqueio Total de Desktop em Todas as Telas (`/login`, `/`, `/home`, etc.)
+- **Problema**: O link `https://vistoria.metriclab.com.br/login` e a rota raiz `/` ainda eram acessíveis no desktop porque a regra anterior limitava-se a `/vistoria/*`.
+- **Solução Implementada**:
+  - `middleware.ts`: Configuração do matcher global para interceptar todas as requisições à aplicação (exceto assets estáticos `_next`, `api`, `favicon.ico`, `sw.js`, `manifest.json` e a própria página `/desktop-blocked`).
+  - Bloqueio imediato no middleware com redirecionamento HTTP 307 para `/desktop-blocked` em qualquer tela (`/login`, `/`, `/home`, `/trechos`, etc.) se o acesso for desktop e fora do modo standalone.
+  - `PwaManager.tsx`: Adicionada proteção dupla no cliente (hydration guard) para redirecionar instantaneamente para `/desktop-blocked` caso ocorra renderização em navegador desktop sem modo standalone.
+  - `app/desktop-blocked/page.tsx`: Se acessado por dispositivo móvel, redireciona automaticamente para `/login`; se em modo standalone no computador, redireciona para `/login`.
+
