@@ -17,6 +17,7 @@ const CHECKLIST_6 = [
 ];
 
 import { useDesktopBlock } from '@/hooks/useDesktopBlock';
+import { useGeolocation } from '@/hooks/useGeolocation';
 
 function VistoriaFormContent() {
   useDesktopBlock();
@@ -54,8 +55,7 @@ function VistoriaFormContent() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [hasSignature, setHasSignature] = useState(false);
   const [isDrawing, setIsDrawing] = useState(false);
-  const [geoLoc, setGeoLoc] = useState<{ lat: number; lng: number } | null>(null);
-  const [capturingGeo, setCapturingGeo] = useState(false);
+  const { latitude, longitude, accuracy, error: geoError, loading: geoLoading } = useGeolocation();
 
   // Submissão
   const [submitting, setSubmitting] = useState(false);
@@ -154,27 +154,6 @@ function VistoriaFormContent() {
     setHasSignature(false);
   };
 
-  const handleCaptureGPS = () => {
-    if (!navigator.geolocation) {
-      setGeoLoc({ lat: -23.5489, lng: -46.6388 });
-      return;
-    }
-    setCapturingGeo(true);
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setGeoLoc({
-          lat: Number(pos.coords.latitude.toFixed(4)),
-          lng: Number(pos.coords.longitude.toFixed(4)),
-        });
-        setCapturingGeo(false);
-      },
-      () => {
-        setGeoLoc({ lat: -23.5489, lng: -46.6388 });
-        setCapturingGeo(false);
-      },
-      { timeout: 8000 }
-    );
-  };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -219,8 +198,8 @@ function VistoriaFormContent() {
 
   // Submission
   const handleSubmitVistoria = async () => {
-    if (!hasSignature || !geoLoc) {
-      setErroGeral('Assinatura e localização são obrigatórias.');
+    if (!hasSignature) {
+      setErroGeral('A assinatura é obrigatória.');
       return;
     }
 
@@ -265,8 +244,12 @@ function VistoriaFormContent() {
           fotos: fotos,
           observacoes: observacoesIniciais.trim() || null,
           ia_aprovado: null,
-          geolat: geoLoc?.lat,
-          geolng: geoLoc?.lng,
+          geolat: latitude,
+          geolng: longitude,
+          latitude,
+          longitude,
+          accuracy,
+          geolocated_at: new Date().toISOString(),
           assinatura_url: assinaturaUrl || null,
           numero_lote: numeroLote.trim(),
           numero_residencia: numeroLote.trim(),
@@ -761,36 +744,19 @@ function VistoriaFormContent() {
               <span className="block text-[12px] font-medium uppercase tracking-[0.08em] text-[#6B7280] mb-2">
                 GEOLOCALIZAÇÃO
               </span>
-              <div className="bg-white border border-[#E2E2DC] rounded-none p-4 flex items-center justify-between">
-                {geoLoc ? (
-                  <div>
-                    <span className="text-[12px] font-medium text-[#111111] block">
-                      Coordenadas capturadas
-                    </span>
-                    <p className="text-[13px] text-[#9CA3AF] font-mono mt-0.5">
-                      {geoLoc.lat.toFixed(6)}, {geoLoc.lng.toFixed(6)}
-                    </p>
-                  </div>
+              <div className="bg-white border border-[#E2E2DC] rounded-none p-4">
+                {geoLoading ? (
+                  <p className="text-[12px] font-normal text-[#9CA3AF]">
+                    Obtendo localização...
+                  </p>
+                ) : geoError !== null ? (
+                  <p className="text-[12px] font-normal text-[#DC2626]">
+                    Localização indisponível — verifique as permissões do celular
+                  </p>
                 ) : (
-                  <div>
-                    <span className="text-[12px] font-medium text-[#6B7280] block">
-                      Localização pendente
-                    </span>
-                    <p className="text-[13px] text-[#9CA3AF] mt-0.5">
-                      Necessário para auditoria pericial
-                    </p>
-                  </div>
-                )}
-
-                {!geoLoc && (
-                  <button
-                    type="button"
-                    onClick={handleCaptureGPS}
-                    disabled={capturingGeo}
-                    className="h-[40px] px-4 bg-[#111111] text-white text-[13px] font-medium rounded-none hover:bg-black active:opacity-85 transition-opacity"
-                  >
-                    {capturingGeo ? 'Obtendo...' : 'Capturar GPS'}
-                  </button>
+                  <p className="text-[12px] font-normal text-[#6B7280]">
+                    Localização capturada
+                  </p>
                 )}
               </div>
             </div>

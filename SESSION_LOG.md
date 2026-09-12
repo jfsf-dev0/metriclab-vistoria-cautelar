@@ -330,3 +330,23 @@ Reestruturar completamente o layout e a arquitetura de interface do PWA `jfsf-de
     - Remoção de botões de cópia, links ou instruções supérfluas.
   - **Variável de Ambiente**:
     - Configurado `PLAYWRIGHT_SECRET=metriclab_audit_2026` em `.env.production` e `.env.local`.
+
+---
+
+### Captura em Tempo Real de Geolocalização & Remoção de Hardcode (Vistoria Cautelar)
+- **Data**: 12 de Setembro de 2026
+- **Objetivo**: Substituir coordenadas fixas/hardcoded (`-23.5489, -46.6388`) por captura real em tempo real via `navigator.geolocation` com hook dedicado, feedback visual dinâmico e permissão no manifesto PWA.
+- **Implementações**:
+  - **Hook `useGeolocation` (`hooks/useGeolocation.ts`)**:
+    - Criado hook de geolocalização com estados `latitude`, `longitude`, `accuracy`, `error` e `loading`.
+    - Configurado com `enableHighAccuracy: true`, `timeout: 10000`, `maximumAge: 0`.
+  - **Formulário de Vistoria (`app/vistoria/novo/page.tsx`)**:
+    - Removidas coordenadas hardcoded de São Paulo.
+    - Integrado `useGeolocation` no formulário de registro.
+    - Payload de submissão enriquecido com `latitude`, `longitude`, `accuracy`, `geolocated_at` e compatibilidade com `geolat`/`geolng`.
+    - Feedback visual sob o campo GEOLOCALIZAÇÃO:
+      - `loading`: "Obtendo localização..." em Inter 400, 12px, `#9CA3AF`.
+      - `error`: "Localização indisponível — verifique as permissões do celular" em Inter 400, 12px, `#DC2626`.
+      - `success`: "Localização capturada" em Inter 400, 12px, `#6B7280`. Coordenadas não são exibidas ao usuário, gravadas apenas no banco.
+  - **Manifesto PWA (`public/manifest.json`)**:
+    - Adicionado `"permissions": ["geolocation"]`.
