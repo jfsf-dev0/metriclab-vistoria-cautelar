@@ -25,15 +25,15 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ) => {
     const variants = {
       primary:
-        'bg-[#111111] hover:bg-black active:opacity-85 text-white font-semibold rounded-none transition-opacity disabled:opacity-40 shadow-none',
+        'bg-[#111111] hover:bg-black active:opacity-85 text-white font-semibold rounded-[8px] transition-opacity disabled:opacity-40 shadow-none',
       secondary:
-        'bg-white border border-[#111111] hover:bg-[#F7F7F5] active:opacity-85 text-[#111111] font-semibold rounded-none transition-opacity disabled:opacity-40 shadow-none',
+        'bg-white border border-[#111111] hover:bg-[#F7F7F5] active:opacity-85 text-[#111111] font-semibold rounded-[8px] transition-opacity disabled:opacity-40 shadow-none',
       danger:
-        'bg-[#DC2626] hover:bg-red-700 active:opacity-85 text-white font-semibold rounded-none transition-opacity disabled:opacity-40 shadow-none',
+        'bg-[#DC2626] hover:bg-red-700 active:opacity-85 text-white font-semibold rounded-[8px] transition-opacity disabled:opacity-40 shadow-none',
       outline:
-        'bg-white border border-[#E2E2DC] hover:border-[#111111] active:opacity-85 text-[#111111] font-medium rounded-none transition-colors disabled:opacity-40 shadow-none',
+        'bg-white border border-[#E2E2DC] hover:border-[#111111] active:opacity-85 text-[#111111] font-medium rounded-[8px] transition-colors disabled:opacity-40 shadow-none',
       ghost:
-        'hover:bg-[#EFEFED] text-[#6B7280] hover:text-[#111111] rounded-none transition-colors disabled:opacity-40',
+        'hover:bg-[#EFEFED] text-[#6B7280] hover:text-[#111111] rounded-[8px] transition-colors disabled:opacity-40',
     };
 
     const sizes = {

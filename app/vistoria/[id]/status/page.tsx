@@ -111,10 +111,10 @@ export default function VistoriaStatusPage() {
           ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
       <div className="flex-1 max-w-md w-full mx-auto px-5 py-6 space-y-6 pb-24">
         {/* CARD DE STATUS NO TOPO */}
-        <div className="bg-white border border-[#E2E2DC] rounded-none p-4 shadow-none">
+        <div className="bg-white border border-[#E2E2DC] rounded-[12px] p-4 shadow-none">
           <div className="flex items-center justify-between mb-3">
             <span
-              className={`px-2.5 py-1 text-[12px] font-medium uppercase tracking-[0.08em] rounded-none ${
+              className={`px-2.5 py-1 text-[12px] font-medium uppercase tracking-[0.08em] rounded-[4px] ${
                 isAprovada
                   ? 'bg-[#111111] text-white'
                   : isReprovada
@@ -150,7 +150,7 @@ export default function VistoriaStatusPage() {
           <span className="block text-[12px] font-medium uppercase tracking-[0.08em] text-[#6B7280] mb-2">
             INFORMAÇÕES DA VISTORIA
           </span>
-          <div className="bg-white border border-[#E2E2DC] rounded-none p-4 grid grid-cols-2 gap-4">
+          <div className="bg-white border border-[#E2E2DC] rounded-[12px] p-4 grid grid-cols-2 gap-4">
             <div>
               <span className="block text-[12px] font-medium uppercase tracking-[0.08em] text-[#6B7280]">
                 IMÓVEL / LOTE
@@ -221,7 +221,7 @@ export default function VistoriaStatusPage() {
             {fotosList.map((fotoUrl: string, idx: number) => (
               <div
                 key={idx}
-                className="aspect-square bg-white border border-[#E2E2DC] rounded-none overflow-hidden"
+                className="aspect-square bg-white border border-[#E2E2DC] rounded-[8px] overflow-hidden"
               >
                 <img
                   src={fotoUrl}
@@ -238,7 +238,7 @@ export default function VistoriaStatusPage() {
           <button
             type="button"
             onClick={() => router.push('/home')}
-            className="w-full h-[52px] bg-[#111111] hover:bg-black active:opacity-85 text-white text-[15px] font-semibold rounded-none transition-opacity flex items-center justify-center cursor-pointer"
+            className="w-full h-[52px] bg-[#111111] hover:bg-black active:opacity-85 text-white text-[15px] font-semibold rounded-[8px] transition-opacity flex items-center justify-center cursor-pointer"
           >
             Concluir e Voltar
           </button>

@@ -411,7 +411,7 @@ export default function HomePage() {
             clearSession();
             router.replace('/login');
           }}
-          className="text-[12px] font-medium text-[#6B7280] hover:text-[#111111] px-3 py-1.5 border border-[#E2E2DC] bg-white rounded-none transition-colors cursor-pointer"
+          className="text-[12px] font-medium text-[#6B7280] hover:text-[#111111] px-3 py-1.5 border border-[#E2E2DC] bg-white rounded-[8px] transition-colors cursor-pointer"
         >
           Sair
         </button>
@@ -448,7 +448,7 @@ export default function HomePage() {
         {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
             CARD DE AÇÃO RÁPIDA: INICIAR VISTORIA
             ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-        <div className="bg-white border border-[#E2E2DC] rounded-none p-4 shadow-none">
+        <div className="bg-white border border-[#E2E2DC] rounded-[12px] p-4 shadow-none">
           <div className="flex items-center justify-between mb-1">
             <span className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#6B7280]">
               AÇÃO RÁPIDA
@@ -469,7 +469,7 @@ export default function HomePage() {
               const defaultTId = trechosList[0]?.id || '9c4f3b4d-a12f-48f0-a338-0ed38a089287';
               router.push(`/vistoria/novo?trecho_id=${defaultTId}`);
             }}
-            className="w-full h-[52px] bg-[#111111] hover:bg-black active:opacity-85 text-white text-[15px] font-semibold rounded-none transition-opacity flex items-center justify-center cursor-pointer"
+            className="w-full h-[52px] bg-[#111111] hover:bg-black active:opacity-85 text-white text-[15px] font-semibold rounded-[8px] transition-opacity flex items-center justify-center cursor-pointer"
           >
             Iniciar Vistoria
           </button>
@@ -482,7 +482,7 @@ export default function HomePage() {
           <span className="text-[12px] font-medium uppercase tracking-[0.08em] text-[#6B7280] block mb-2">
             TRECHOS DISPONÍVEIS
           </span>
-          <div className="bg-white border border-[#E2E2DC] divide-y divide-[#E2E2DC] rounded-none shadow-none">
+          <div className="bg-white border border-[#E2E2DC] divide-y divide-[#E2E2DC] rounded-[12px] overflow-hidden shadow-none">
             {trechosList.map((t) => (
               <div
                 key={t.id}
@@ -509,7 +509,7 @@ export default function HomePage() {
         {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
             PENDÊNCIAS
             ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-        <section className="bg-white border border-[#E2E2DC] rounded-none p-4 shadow-none">
+        <section className="bg-white border border-[#E2E2DC] rounded-[12px] p-4 shadow-none">
           <div className="flex flex-row justify-between items-center">
             {/* Vistorias */}
             <div className="flex flex-col items-center justify-center flex-1">
@@ -561,16 +561,16 @@ export default function HomePage() {
           </div>
 
           {loading && feedItems.length === 0 ? (
-            <div className="bg-white border border-[#E2E2DC] p-4 space-y-3">
+            <div className="bg-white border border-[#E2E2DC] rounded-[12px] p-4 space-y-3">
               {[1, 2, 3].map((idx) => (
                 <div
                   key={idx}
-                  className="bg-[#F7F7F5] animate-pulse h-[52px]"
+                  className="bg-[#F7F7F5] rounded-[8px] animate-pulse h-[52px]"
                 />
               ))}
             </div>
           ) : filteredFeed.length === 0 ? (
-            <div className="bg-white border border-[#E2E2DC] p-6 text-center">
+            <div className="bg-white border border-[#E2E2DC] rounded-[12px] p-6 text-center">
               <p className="text-[14px] text-[#6B7280]">
                 {searchQuery
                   ? 'Nenhum registro encontrado para a busca.'
@@ -578,7 +578,7 @@ export default function HomePage() {
               </p>
             </div>
           ) : (
-            <div className="bg-white border border-[#E2E2DC] divide-y divide-[#E2E2DC] rounded-none shadow-none">
+            <div className="bg-white border border-[#E2E2DC] divide-y divide-[#E2E2DC] rounded-[12px] overflow-hidden shadow-none">
               {filteredFeed.map((item) => (
                 <div
                   key={`${item.tipoItem}-${item.id}`}

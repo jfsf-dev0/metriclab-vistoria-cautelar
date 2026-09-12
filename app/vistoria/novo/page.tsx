@@ -321,7 +321,7 @@ function VistoriaFormContent() {
           ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
       <div className="w-full h-[2px] bg-[#E2E2DC] sticky top-0 z-30">
         <div
-          className="h-full bg-[#111111] transition-all duration-300 rounded-none"
+          className="h-full bg-[#111111] transition-all duration-300 rounded-full"
           style={{ width: `${(passo / 4) * 100}%` }}
         />
       </div>
@@ -351,7 +351,7 @@ function VistoriaFormContent() {
           ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
       <div className="flex-1 max-w-md w-full mx-auto px-5 py-6 pb-32">
         {erroGeral && (
-          <div className="mb-6 p-4 bg-white border border-[#DC2626] text-[13px] text-[#DC2626]">
+          <div className="mb-6 p-4 bg-white border border-[#DC2626] rounded-[8px] text-[13px] text-[#DC2626]">
             {erroGeral}
           </div>
         )}
@@ -371,7 +371,7 @@ function VistoriaFormContent() {
                 value={numeroLote}
                 onChange={(e) => setNumeroLote(e.target.value)}
                 placeholder="Ex: 154, Lote 12A"
-                className="w-full h-[48px] px-4 bg-white border border-[#E2E2DC] rounded-none text-[15px] text-[#111111] placeholder:text-[#9CA3AF] focus:border-[#111111] focus:outline-none transition-colors"
+                className="w-full h-[48px] px-4 bg-white border border-[#E2E2DC] rounded-[8px] text-[15px] text-[#111111] placeholder:text-[#9CA3AF] focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all"
               />
             </div>
 
@@ -384,7 +384,7 @@ function VistoriaFormContent() {
                 value={complemento}
                 onChange={(e) => setComplemento(e.target.value)}
                 placeholder="Ex: Casa fundos, Apto 3..."
-                className="w-full h-[48px] px-4 bg-white border border-[#E2E2DC] rounded-none text-[15px] text-[#111111] placeholder:text-[#9CA3AF] focus:border-[#111111] focus:outline-none transition-colors"
+                className="w-full h-[48px] px-4 bg-white border border-[#E2E2DC] rounded-[8px] text-[15px] text-[#111111] placeholder:text-[#9CA3AF] focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all"
               />
             </div>
 
@@ -397,7 +397,7 @@ function VistoriaFormContent() {
                 value={nomeMorador}
                 onChange={(e) => setNomeMorador(e.target.value)}
                 placeholder="Nome completo do residente"
-                className="w-full h-[48px] px-4 bg-white border border-[#E2E2DC] rounded-none text-[15px] text-[#111111] placeholder:text-[#9CA3AF] focus:border-[#111111] focus:outline-none transition-colors"
+                className="w-full h-[48px] px-4 bg-white border border-[#E2E2DC] rounded-[8px] text-[15px] text-[#111111] placeholder:text-[#9CA3AF] focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all"
               />
             </div>
 
@@ -406,7 +406,7 @@ function VistoriaFormContent() {
               <span className="block text-[12px] font-medium uppercase tracking-[0.08em] text-[#6B7280] mb-2">
                 PERFIL DOS MORADORES
               </span>
-              <div className="bg-white border border-[#E2E2DC] divide-y divide-[#E2E2DC] rounded-none">
+              <div className="bg-white border border-[#E2E2DC] divide-y divide-[#E2E2DC] rounded-[12px] overflow-hidden">
                 {/* Idosos */}
                 <div className="p-4 flex items-center justify-between">
                   <span className="text-[15px] text-[#111111]">
@@ -416,7 +416,7 @@ function VistoriaFormContent() {
                     <button
                       type="button"
                       onClick={() => setTemIdosos(true)}
-                      className={`h-[40px] px-4 text-[14px] font-medium rounded-none border transition-colors ${
+                      className={`h-[40px] px-4 text-[14px] font-medium rounded-[8px] border transition-colors ${
                         temIdosos === true
                           ? 'bg-[#111111] text-white border-[#111111]'
                           : 'bg-white border-[#E2E2DC] text-[#111111] hover:bg-[#F7F7F5]'
@@ -427,7 +427,7 @@ function VistoriaFormContent() {
                     <button
                       type="button"
                       onClick={() => setTemIdosos(false)}
-                      className={`h-[40px] px-4 text-[14px] font-medium rounded-none border transition-colors ${
+                      className={`h-[40px] px-4 text-[14px] font-medium rounded-[8px] border transition-colors ${
                         temIdosos === false
                           ? 'bg-[#111111] text-white border-[#111111]'
                           : 'bg-white border-[#E2E2DC] text-[#111111] hover:bg-[#F7F7F5]'
@@ -447,7 +447,7 @@ function VistoriaFormContent() {
                     <button
                       type="button"
                       onClick={() => setTemCriancas(true)}
-                      className={`h-[40px] px-4 text-[14px] font-medium rounded-none border transition-colors ${
+                      className={`h-[40px] px-4 text-[14px] font-medium rounded-[8px] border transition-colors ${
                         temCriancas === true
                           ? 'bg-[#111111] text-white border-[#111111]'
                           : 'bg-white border-[#E2E2DC] text-[#111111] hover:bg-[#F7F7F5]'
@@ -458,7 +458,7 @@ function VistoriaFormContent() {
                     <button
                       type="button"
                       onClick={() => setTemCriancas(false)}
-                      className={`h-[40px] px-4 text-[14px] font-medium rounded-none border transition-colors ${
+                      className={`h-[40px] px-4 text-[14px] font-medium rounded-[8px] border transition-colors ${
                         temCriancas === false
                           ? 'bg-[#111111] text-white border-[#111111]'
                           : 'bg-white border-[#E2E2DC] text-[#111111] hover:bg-[#F7F7F5]'
@@ -478,7 +478,7 @@ function VistoriaFormContent() {
                     <button
                       type="button"
                       onClick={() => setImovelDesocupado(true)}
-                      className={`h-[40px] px-4 text-[14px] font-medium rounded-none border transition-colors ${
+                      className={`h-[40px] px-4 text-[14px] font-medium rounded-[8px] border transition-colors ${
                         imovelDesocupado === true
                           ? 'bg-[#111111] text-white border-[#111111]'
                           : 'bg-white border-[#E2E2DC] text-[#111111] hover:bg-[#F7F7F5]'
@@ -489,7 +489,7 @@ function VistoriaFormContent() {
                     <button
                       type="button"
                       onClick={() => setImovelDesocupado(false)}
-                      className={`h-[40px] px-4 text-[14px] font-medium rounded-none border transition-colors ${
+                      className={`h-[40px] px-4 text-[14px] font-medium rounded-[8px] border transition-colors ${
                         imovelDesocupado === false
                           ? 'bg-[#111111] text-white border-[#111111]'
                           : 'bg-white border-[#E2E2DC] text-[#111111] hover:bg-[#F7F7F5]'
@@ -509,7 +509,7 @@ function VistoriaFormContent() {
                     <button
                       type="button"
                       onClick={() => setAcessoDisponivel(true)}
-                      className={`h-[40px] px-4 text-[14px] font-medium rounded-none border transition-colors ${
+                      className={`h-[40px] px-4 text-[14px] font-medium rounded-[8px] border transition-colors ${
                         acessoDisponivel === true
                           ? 'bg-[#111111] text-white border-[#111111]'
                           : 'bg-white border-[#E2E2DC] text-[#111111] hover:bg-[#F7F7F5]'
@@ -520,7 +520,7 @@ function VistoriaFormContent() {
                     <button
                       type="button"
                       onClick={() => setAcessoDisponivel(false)}
-                      className={`h-[40px] px-4 text-[14px] font-medium rounded-none border transition-colors ${
+                      className={`h-[40px] px-4 text-[14px] font-medium rounded-[8px] border transition-colors ${
                         acessoDisponivel === false
                           ? 'bg-[#111111] text-white border-[#111111]'
                           : 'bg-white border-[#E2E2DC] text-[#111111] hover:bg-[#F7F7F5]'
@@ -543,7 +543,7 @@ function VistoriaFormContent() {
                 value={observacoesIniciais}
                 onChange={(e) => setObservacoesIniciais(e.target.value)}
                 placeholder="Estado aparente da fachada, vizinhança, acesso e condições gerais..."
-                className="w-full bg-white border border-[#E2E2DC] rounded-none p-3.5 text-[15px] text-[#111111] placeholder:text-[#9CA3AF] focus:border-[#111111] focus:outline-none resize-none transition-colors"
+                className="w-full bg-white border border-[#E2E2DC] rounded-[8px] p-3.5 text-[15px] text-[#111111] placeholder:text-[#9CA3AF] focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none resize-none transition-all"
               />
             </div>
           </div>
@@ -563,7 +563,7 @@ function VistoriaFormContent() {
               </p>
             </div>
 
-            <div className="bg-white border border-[#E2E2DC] divide-y divide-[#E2E2DC] rounded-none">
+            <div className="bg-white border border-[#E2E2DC] divide-y divide-[#E2E2DC] rounded-[12px] overflow-hidden">
               {CHECKLIST_6.map((pergunta, idx) => {
                 const resp = checklistRespostas[idx];
                 const isOpen = openChecklistIdx === idx;
@@ -598,7 +598,7 @@ function VistoriaFormContent() {
                           setChecklistRespostas((prev) => ({ ...prev, [idx]: true }));
                           setOpenChecklistIdx(null);
                         }}
-                        className={`flex-1 h-[44px] text-[14px] font-medium rounded-none border transition-colors ${
+                        className={`flex-1 h-[44px] text-[14px] font-medium rounded-[8px] border transition-colors ${
                           resp === true
                             ? 'bg-[#111111] text-white border-[#111111]'
                             : 'bg-white border-[#E2E2DC] text-[#111111] hover:bg-[#F7F7F5]'
@@ -612,7 +612,7 @@ function VistoriaFormContent() {
                           setChecklistRespostas((prev) => ({ ...prev, [idx]: false }));
                           setOpenChecklistIdx(null);
                         }}
-                        className={`flex-1 h-[44px] text-[14px] font-medium rounded-none border transition-colors ${
+                        className={`flex-1 h-[44px] text-[14px] font-medium rounded-[8px] border transition-colors ${
                           resp === false
                             ? 'bg-[#111111] text-white border-[#111111]'
                             : 'bg-white border-[#E2E2DC] text-[#111111] hover:bg-[#F7F7F5]'
@@ -653,7 +653,7 @@ function VistoriaFormContent() {
 
             <div
               onClick={() => fileInputRef.current?.click()}
-              className="border border-dashed border-[#E2E2DC] bg-white rounded-none py-10 px-4 flex flex-col items-center justify-center cursor-pointer hover:border-[#111111] transition-colors"
+              className="border border-dashed border-[#E2E2DC] bg-white rounded-[12px] py-10 px-4 flex flex-col items-center justify-center cursor-pointer hover:border-[#111111] transition-colors"
             >
               {uploadingFoto ? (
                 <Loader2 className="w-6 h-6 text-[#111111] animate-spin mb-2" />
@@ -674,7 +674,7 @@ function VistoriaFormContent() {
                 {fotos.map((foto, idx) => (
                   <div
                     key={idx}
-                    className="relative aspect-square bg-[#F7F7F5] rounded-none overflow-hidden group border border-[#E2E2DC]"
+                    className="relative aspect-square bg-[#F7F7F5] rounded-[8px] overflow-hidden group border border-[#E2E2DC]"
                   >
                     <img
                       src={foto}
@@ -687,7 +687,7 @@ function VistoriaFormContent() {
                         e.stopPropagation();
                         handleRemoveFoto(idx);
                       }}
-                      className="absolute top-1 right-1 bg-[#111111]/80 text-white text-[12px] w-6 h-6 rounded-none flex items-center justify-center transition-colors"
+                      className="absolute top-1 right-1 bg-[#111111]/80 text-white text-[12px] w-6 h-6 rounded-full flex items-center justify-center transition-colors"
                     >
                       ×
                     </button>
@@ -719,7 +719,7 @@ function VistoriaFormContent() {
                 )}
               </div>
 
-              <div className="border border-[#E2E2DC] rounded-none bg-white h-[180px] w-full overflow-hidden relative">
+              <div className="border border-[#E2E2DC] rounded-[12px] bg-white h-[180px] w-full overflow-hidden relative">
                 <canvas
                   ref={canvasRef}
                   onMouseDown={startDrawing}
@@ -744,7 +744,7 @@ function VistoriaFormContent() {
               <span className="block text-[12px] font-medium uppercase tracking-[0.08em] text-[#6B7280] mb-2">
                 GEOLOCALIZAÇÃO
               </span>
-              <div className="bg-white border border-[#E2E2DC] rounded-none p-4">
+              <div className="bg-white border border-[#E2E2DC] rounded-[12px] p-4">
                 {geoLoading ? (
                   <p className="text-[12px] font-normal text-[#9CA3AF]">
                     Obtendo localização...
@@ -765,7 +765,7 @@ function VistoriaFormContent() {
       </div>
 
       {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-          BOTÃO FIXO INFERIOR (52PX, FULL-WIDTH, RAIO 0)
+          BOTÃO FIXO INFERIOR (52PX, FULL-WIDTH, RAIO 8PX)
           ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-[#F7F7F5] border-t border-[#E2E2DC] z-30">
         <div className="max-w-md mx-auto">
@@ -780,7 +780,7 @@ function VistoriaFormContent() {
                 setErroGeral(null);
                 setPasso(2);
               }}
-              className="w-full h-[52px] bg-[#111111] hover:bg-black active:opacity-85 text-white text-[15px] font-semibold rounded-none transition-opacity flex items-center justify-center cursor-pointer"
+              className="w-full h-[52px] bg-[#111111] hover:bg-black active:opacity-85 text-white text-[15px] font-semibold rounded-[8px] transition-opacity flex items-center justify-center cursor-pointer"
             >
               Próximo
             </button>
@@ -792,7 +792,7 @@ function VistoriaFormContent() {
               onClick={() => {
                 setPasso(3);
               }}
-              className="w-full h-[52px] bg-[#111111] hover:bg-black active:opacity-85 text-white text-[15px] font-semibold rounded-none transition-opacity flex items-center justify-center cursor-pointer"
+              className="w-full h-[52px] bg-[#111111] hover:bg-black active:opacity-85 text-white text-[15px] font-semibold rounded-[8px] transition-opacity flex items-center justify-center cursor-pointer"
             >
               Próximo
             </button>
@@ -802,7 +802,7 @@ function VistoriaFormContent() {
             <button
               type="button"
               onClick={() => setPasso(4)}
-              className="w-full h-[52px] bg-[#111111] hover:bg-black active:opacity-85 text-white text-[15px] font-semibold rounded-none transition-opacity flex items-center justify-center cursor-pointer"
+              className="w-full h-[52px] bg-[#111111] hover:bg-black active:opacity-85 text-white text-[15px] font-semibold rounded-[8px] transition-opacity flex items-center justify-center cursor-pointer"
             >
               Próximo
             </button>
@@ -813,7 +813,7 @@ function VistoriaFormContent() {
               type="button"
               disabled={submitting}
               onClick={handleSubmitVistoria}
-              className="w-full h-[52px] bg-[#111111] hover:bg-black active:opacity-85 text-white text-[15px] font-semibold rounded-none transition-opacity flex items-center justify-center cursor-pointer disabled:opacity-40"
+              className="w-full h-[52px] bg-[#111111] hover:bg-black active:opacity-85 text-white text-[15px] font-semibold rounded-[8px] transition-opacity flex items-center justify-center cursor-pointer disabled:opacity-40"
             >
               {submitting ? 'Gravando vistoria...' : 'Concluir e Enviar'}
             </button>
